@@ -44,9 +44,7 @@ app.factory('friends', ['$http', function($http){
 
 	o.grabPocketToken = function(){
 		return $http.get('/user/pocketToken').success(function(res){
-			$http.post('https://getpocket.com/v3/get', res.data).success(function(res){
 				console.log(res.data);
-			});
 		});
 	};
 
@@ -169,7 +167,7 @@ app.controller('landCtrl', ['$scope', 'friends', function($scope, friends){
 }]);
 app.config(['$httpProvider','$stateProvider', '$urlRouterProvider', 
 	function($httpProvider,$stateProvider, $urlRouterProvider){
-		
+
 		$httpProvider.defaults.useXDomain = true;
 		$httpProvider.defaults.withCredentials = true;
 		delete $httpProvider.defaults.headers.common["X-Requested-With"];

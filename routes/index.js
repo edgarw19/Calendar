@@ -27,7 +27,7 @@ var data ={
 };
 console.log("mailgun");
 mailgun.messages().send(data, function(error, body){
-  console.log("CAME HERE");
+  console.log("CAME");
   console.log(body);
   console.log(error);
 });
