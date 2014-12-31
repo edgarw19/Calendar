@@ -7,7 +7,8 @@ var FriendSchema = new mongoose.Schema({
 	emailAddress: String,
 	pastInteraction: [],
 	lastTime: Date,
-	notes: [{type: mongoose.Schema.Types.ObjectId, ref: 'Note'}]
+	notes: [String],
+	user: String
 
 });
 

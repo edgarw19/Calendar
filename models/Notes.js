@@ -1,10 +1,11 @@
 var mongoose = require('mongoose');
 
 var NoteSchema = new mongoose.Schema({
+  user: String,
   note: String,
   date: Number,
   dateString: String,
-  friend: { type: mongoose.Schema.Types.ObjectId, ref: 'Friends' }
+  friend: String
 });
 
 NoteSchema.methods.upvote = function(cb){

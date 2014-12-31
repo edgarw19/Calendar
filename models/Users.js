@@ -1,19 +1,16 @@
 var mongoose = require('mongoose');
-
 var UserSchema = new mongoose.Schema({
 	userName: String,
+	friends: [String],
 	googleId: {
 		id: String,
 		token: String,
-		refreshToken: String,
 		email: String,
-		name: String,
-		lastTime: Date},
-	upvotes: Number,
+		name: String},
 	pocketId:{
-		username: String,
+		username: {type: String, default: "None"},
 		accessToken: String
 	}
 });
 
-mongoose.model('UserModel', UserSchema);
+module.exports = mongoose.model('User', UserSchema);	

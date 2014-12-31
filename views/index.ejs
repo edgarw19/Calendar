@@ -93,7 +93,7 @@
 			<h3>Email: {{friend.emailAddress}}</h3>
 		</div>
 
-		<div ng-repeat="note in friend.notes | orderBy:'friend.date'">
+		<div ng-repeat="note in notes | orderBy:'friend.date'">
 			<span class="glyphicon glyphicon-trash"
 			ng-click="deleteNote(note, $index)"></span>
 			<span style="font-size:20px; margin-left:10px;">

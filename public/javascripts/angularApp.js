@@ -33,6 +33,14 @@ app.factory('friends', ['$http', function($http){
 		});
 	};
 
+	o.getNotes = function(id){
+		return $http.get('/friends/' + id + '/notes').then(function(res){
+			console.log(res.data);
+			return res.data;
+		});
+	};
+
+
 	o.addNote = function(id, note){
 		return $http.post('/friends/'+id+'/notes', note);
 	};
@@ -45,13 +53,6 @@ app.factory('friends', ['$http', function($http){
 	o.grabPocketToken = function(){
 		return $http.get('/user/pocketToken').success(function(res){
 				console.log(res.data);
-		});
-	};
-
-	o.upvoteComment = function(post, comment){
-		return $http.put('/friends/' + post._id + '/comments/' + comment._id + '/upvote').
-		success(function(data){
-			comment.upvotes += 1;
 		});
 	};
 
@@ -77,7 +78,7 @@ app.controller('MainCtrl', [
 		$scope.addFriend = function(){
 			console.log($scope);
 			console.log($scope.frequency);
-			if(!$scope.firstName || !$scope.lastName || !$scope.emailAddress){return;}
+			if(!$scope.firstName || !$scope.lastName || !$scope.emailAddress || !$scope.frequency){return;}
 			friends.create({
 				firstName: $scope.firstName,
 				lastName: $scope.lastName,
@@ -126,10 +127,16 @@ app.controller('MainCtrl', [
 // 			$scope.body = '';
 // 		}
 // 	
-app.controller('friendsCtrl', ['$scope', 'friend', 'friends',
-	function($scope, friend, friends){
+app.controller('friendsCtrl', ['$scope', 'friend', 'notes', 'friends',
+	function($scope, friend, friends, notes){
 		$scope.doComment = false;
 		$scope.friend = friend;
+		console.log(friend);
+		$scope.notes = notes;
+		console.log(notes);
+		for (var i = 0; i < $scope.notes.length; i++){
+			console.log($scope.notes[i]);
+		};
 		$scope.test = function(){
 			friends.test();
 		};
@@ -144,14 +151,15 @@ app.controller('friendsCtrl', ['$scope', 'friend', 'friends',
 			};
 			friends.addNote(friend._id, newNote).success(function(note){
 				newNote._id = note._id;
-				$scope.friend.notes.push(newNote);
+				$scope.notes.push(newNote);
 			});
 			$scope.note = '';
 		};
 		$scope.deleteNote = function(note, index){
+			console.log(note);
 			console.log("delete");
-			friends.deleteNote(friend._id, note);
-			$scope.friend.notes.splice(index, 1);
+			//friends.deleteNote(friend._id, note);
+			$scope.notes.splice(index, 1);
 		};
 
 		$scope.showComment = function(){
@@ -190,6 +198,9 @@ app.config(['$httpProvider','$stateProvider', '$urlRouterProvider',
 			resolve: {
 				friend: ['$stateParams', 'friends', function($stateParams, friends){
 					return friends.get($stateParams.id);
+				}],
+				notes: ['$stateParams', 'friends', function($stateParams, friends){
+					return friends.getNotes($stateParams.id);
 				}]
 			}
 		});
