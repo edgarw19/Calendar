@@ -83,7 +83,8 @@ router.get('/home', function(req, res){
 });
 
 router.get('/events', function(req, res, next) {
-  Events.find({}, function(err, events){
+    var cutOff = new Date().getTime();
+  Events.find({eventUTC: {$gt: cutOff}}, function(err, events){
     res.json(events);
   });
 });

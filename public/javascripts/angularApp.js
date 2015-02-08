@@ -27,6 +27,16 @@ app.factory('friends', ['$http', function($http){
 	return o;
 }]);
 
+function sortOn(collection, name){
+	collection.sort(
+		function(a, b){
+			if (a[name] <= b[name]){
+				return (1);
+			}
+			else return -1;
+		});
+};
+
 app.controller('MainCtrl', [
 	'$scope', 'friends', 'LxDialogService', 'LxNotificationService',
 	function($scope, friends, LxDialogService, LxNotificationService){//friends must be passed in
@@ -35,18 +45,32 @@ app.controller('MainCtrl', [
 		$scope.dialog = {};
 		$scope.extraTags = [];
 		var category = {};
-		$scope.category = "CATEGORY";
+		$scope.category = "Choose Category";
+		$scope.groupBy = function(attribute){
+			$scope.groups = [];
+			sortOn($scope.events, attribute);
+			var groupValue = "_INVALID_GROUP_VALUE_";
+			for (var i = 0; i < $scope.events.length; i++){
+				var event = $scope.events[i];
+				if (event[attribute] !== groupValue){
+					var group = {
+						label: event[attribute],
+						events: []
+					};
+					groupValue = group.label;
+					$scope.groups.push(group);
+				}
+				group.events.push(event);
+			}
+		};
+		$scope.groupBy('eventDisplay');
 		$scope.setCategory = function(number){
 			category.color = friends.colors[number];
 			category.name = friends.categories[number];
 			$scope.category = category.name;
 		};
 		$scope.test = function(){
-			var str = "test@princeton.edu";
-			var n = str.search(/@princeton.edu$/);
-			console.log($scope.extraTags);
-			console.log(n);
-			console.log($scope.searchTerm);
+			console.log($scope.groups);
 		};
 		$scope.setDialog = function(event){
 			console.log(event);
@@ -78,7 +102,7 @@ app.controller('MainCtrl', [
 		};
 		$scope.addNewEvent = function(){
 			//Find the time
-			if(!$scope.eventName || !$scope.eventHost || !$scope.eventDescription  
+			if(!$scope.eventName || !$scope.eventHost || ($scope.eventDescription === "CATEGORY")  
 				|| !$scope.startTime || !$scope.endTime || !$scope.startTime)
 				{
 					$scope.submissionError = "Missing a required field";
@@ -111,7 +135,7 @@ app.controller('MainCtrl', [
 			});
 			$scope.clearEventForm();
 			$scope.showEventForm();
-			LxNotificationService.notify('Event Submitted!');
+			LxNotificationService.notify('Event Submitted! Refresh page!');
 		};
 		$scope.showEventForm = function(){
 			$scope.showEvent = !$scope.showEvent;
@@ -214,19 +238,6 @@ app.config(['$httpProvider','$stateProvider', '$urlRouterProvider',
 			resolve: {
 				postPromise: ['friends', function(friends){
 					return friends.getAll();
-				}]
-			}
-		});
-		$stateProvider.state('friends', {
-			url: '/friends/{id}',
-			templateUrl: '/friends.html',
-			controller: 'friendsCtrl',
-			resolve: {
-				friend: ['$stateParams', 'friends', function($stateParams, friends){
-					return friends.get($stateParams.id);
-				}],
-				notes: ['$stateParams', 'friends', function($stateParams, friends){
-					return friends.getNotes($stateParams.id);
 				}]
 			}
 		});
