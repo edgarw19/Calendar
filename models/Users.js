@@ -7,10 +7,8 @@ var UserSchema = new mongoose.Schema({
 		token: String,
 		email: String,
 		name: String},
-	pocketId:{
-		username: {type: String, default: "None"},
-		accessToken: String
-	}
+	eventsLiked: [],
+	eventsAttending: []
 });
 
 module.exports = mongoose.model('User', UserSchema);	

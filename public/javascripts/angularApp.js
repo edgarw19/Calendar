@@ -1,94 +1,120 @@
-var app = angular.module('flapperNews', ['ui.router']);
+var app = angular.module('flapperNews', ['ui.router', 'lumx', 'clock', 'bootstrap-tagsinput']);
+
+
+
+
 
 app.factory('friends', ['$http', function($http){
 	var o = {
-		friends: [],
+		events: [],
 		months: ["Jan", "Feb", "March", "April", "May", "June",
-		"July", "Aug", "Sept", "Oct", "Nov", "Dec"]
-	};
-
+		"July", "Aug", "Sept", "Oct", "Nov", "Dec"],
+		days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+		categories: ["Club", "Off-Campus", "Recruiting", "Talk/Discussion", "University Event"],
+		colors: ["green", "red", "blue", "grey", "orange"]
+	};  
 	o.getAll = function(){
-		return $http.get('/friends').success(function(data){
-			angular.copy(data, o.friends);//makes UI update correctly
+		return $http.get('/events').success(function(data){
+			angular.copy(data, o.events);//makes UI update correctly
 		});
 	};
-	o.create = function(friend){
-		return $http.post('/friends', friend).success(function(data){
-			o.friends.push(data);
+	o.create = function(event){
+		return $http.post('/events', event).success(function(data){
+			console.log(data);
+			o.events.push(data);
 		});
 	};
-	o.upvote = function(post){
-		return $http.put('/friends/' + post._id + '/upvote').success(function(data){
-			post.upvotes += 1;
-		});
-	};
-	o.downvote = function(post){
-		return $http.put('/friends/' + post._id + '/downvote').success(function(data){
-			post.upvotes -= 1;
-		});
-	};
-	o.get = function(id){
-		return $http.get('/friends/' + id).then(function(res){
-			return res.data;
-		});
-	};
-
-	o.getNotes = function(id){
-		return $http.get('/friends/' + id + '/notes').then(function(res){
-			console.log(res.data);
-			return res.data;
-		});
-	};
-
-
-	o.addNote = function(id, note){
-		return $http.post('/friends/'+id+'/notes', note);
-	};
-
-	o.deleteNote = function(id, note){
-		console.log(note);
-		return $http.delete('/friends/'+id+'/notes/'+note._id);
-	};
-
-	o.grabPocketToken = function(){
-		return $http.get('/user/pocketToken').success(function(res){
-				console.log(res.data);
-		});
-	};
-
-	o.test = function(){
-		return $http.get('/test');
-	}
 	return o;
 }]);
 
 app.controller('MainCtrl', [
-	'$scope', 'friends',
-	function($scope, friends){//friends must be passed in
-		$scope.friends = friends.friends;
-		$scope.grabPocket = function(){
-			console.log("grab pocket start here");
-			var answer = friends.grabPocketToken();
-			console.log(answer);
+	'$scope', 'friends', 'LxDialogService', 'LxNotificationService',
+	function($scope, friends, LxDialogService, LxNotificationService){//friends must be passed in
+		$scope.events = friends.events;
+		$scope.showEvent = false;
+		$scope.dialog = {};
+		$scope.extraTags = [];
+		var category = {};
+		$scope.category = "CATEGORY";
+		$scope.setCategory = function(number){
+			category.color = friends.colors[number];
+			category.name = friends.categories[number];
+			$scope.category = category.name;
 		};
 		$scope.test = function(){
-			console.log("HERE");
-			friends.test();
+			var str = "test@princeton.edu";
+			var n = str.search(/@princeton.edu$/);
+			console.log($scope.extraTags);
+			console.log(n);
+			console.log($scope.searchTerm);
 		};
-		$scope.addFriend = function(){
-			console.log($scope);
-			console.log($scope.frequency);
-			if(!$scope.firstName || !$scope.lastName || !$scope.emailAddress || !$scope.frequency){return;}
+		$scope.setDialog = function(event){
+			console.log(event);
+			$scope.dialog.Title = event.eventName;
+			$scope.dialog.Date = event.eventDisplay;
+			$scope.dialog.Description = event.eventDescription;
+			$scope.dialog.Host = event.eventHost;
+			if (event.startTimeString && event.endTimeString){
+			$scope.dialog.Time = event.startTimeString.substring(0, 5) + "-" + event.endTimeString;
+			}
+		};
+		$scope.opendDialog = function(event)
+		{
+			$scope.setDialog(event);
+
+			LxDialogService.open('test');
+		};
+
+
+		$scope.closingDialog = function()
+		{
+
+		};
+		$scope.clearEventForm = function(){
+			$scope.eventName = "";
+			$scope.eventHost = "";
+			$scope.eventDescription = "";
+			$scope.category = "CATEGORY";
+		};
+		$scope.addNewEvent = function(){
+			//Find the time
+			if(!$scope.eventName || !$scope.eventHost || !$scope.eventDescription  
+				|| !$scope.startTime || !$scope.endTime || !$scope.startTime)
+				{
+					$scope.submissionError = "Missing a required field";
+					return;
+				}
+				$scope.submissionError = "";
+			var timeString = $scope.startTime;
+			var timeNumber = Number(timeString.substring(0, 2));
+			if (timeString.length > 4 && timeString.substring(5, 7) == "AM"){
+			} 
+			else {
+				timeNumber += 12;
+			}
+			//Find the date
+			var newDate = new Date($scope.eventDate);
+			var eventString = friends.days[newDate.getDay()] + ", ";
+			eventString += friends.months[newDate.getMonth()] + " " + newDate.getDate();
+			console.log(eventString);
+			//Create Event
 			friends.create({
-				firstName: $scope.firstName,
-				lastName: $scope.lastName,
-				emailAddress: $scope.emailAddress,
-				updateFrequency: $scope.frequency,
-				lastTime: new Date()
+				eventName: $scope.eventName,
+				eventHost: $scope.eventHost,
+				eventDescription: $scope.eventDescription,
+				eventUTC: (newDate.getTime()+timeNumber),
+				eventDisplay: eventString,
+				category: category.name,
+				categoryColor: category.color,
+				startTimeString: $scope.startTime,
+				endTimeString: $scope.endTime,
 			});
-			$scope.firstName = '';
-			$scope.lastName = '';
-			$scope.emailAddress = '';
+			$scope.clearEventForm();
+			$scope.showEventForm();
+			LxNotificationService.notify('Event Submitted!');
+		};
+		$scope.showEventForm = function(){
+			$scope.showEvent = !$scope.showEvent;
 		};
 		$scope.incrementUpvotes = function(post){
 			console.log(post.comments.length);
@@ -128,12 +154,10 @@ app.controller('MainCtrl', [
 // 		}
 // 	
 app.controller('friendsCtrl', ['$scope', 'friend', 'notes', 'friends',
-	function($scope, friend, friends, notes){
+	function($scope, friend, notes, friends){
 		$scope.doComment = false;
 		$scope.friend = friend;
-		console.log(friend);
 		$scope.notes = notes;
-		console.log(notes);
 		for (var i = 0; i < $scope.notes.length; i++){
 			console.log($scope.notes[i]);
 		};
@@ -163,6 +187,8 @@ app.controller('friendsCtrl', ['$scope', 'friend', 'notes', 'friends',
 		};
 
 		$scope.showComment = function(){
+			console.log(notes);
+			console.log(friend);
 			$scope.doComment = !$scope.doComment;
 		};
 	}]);

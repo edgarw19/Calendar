@@ -26,8 +26,7 @@ var routes = require('./routes/index');
 
 var app = express();
 
-mongoose.connect('mongodb://localhost/news');
-
+mongoose.connect('mongodb://edgarw19:poepoe123@ds041821.mongolab.com:41821/pcalendar');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

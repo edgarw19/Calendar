@@ -24,11 +24,14 @@
   <link rel="stylesheet" href="./stylesheets/normalize.css">
   <link rel="stylesheet" href="./stylesheets/skeleton.css">
   <link rel="stylesheet" href="./stylesheets/custom.css">
-  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./stylesheets/bootstrap.css">
+  <link rel="stylesheet" href="./stylesheets/jquery-clockpicker.min.css">
+
 
   <!-- Scripts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -72,6 +75,13 @@
   		</div>
   	</div>
   </div>
+
+      <div class="grid__col4">
+    <div class="input-group clockpicker">
+        <input type="text" class="form-control" value="09:30">
+        </div>
+
+    </div>
 
 
   <div class="section get-help">
@@ -127,12 +137,184 @@
   </div>
 </div>
 
+<div class="col-md-10">
+  <h1>Princeton Events</h1>
+</div>
+<div class="col-md-12">
+  <!--  ADD EVENT FORM -->
+  <button class="btn btn--m btn--blue btn--raised" ng-click="showEventForm()" lx-ripple>Add Event</button>  
+  <div class="grid" ng-show="showEvent">
+    <div class="col-md-4">
+      <lx-text-field label="Event Name">
+      <input type="text" ng-model="eventName">
+    </lx-text-field>
+  </div>
+
+  <div class="col-md-4">
+    <lx-text-field label="Host Name">
+    <input type="text" ng-model="eventHost">
+  </lx-text-field>
+</div>
+<div class="col-md-10">
+  <lx-text-field label="Event Description">
+  <textarea type="text" class="form-control" ng-model="eventDescription"></textarea>
+</lx-text-field>
+</div>
+<br>
+<div class="col-md-4">
+  <lx-date-picker label="Pick a date" model="eventDate" >Pick a date</lx-date-picker>
+</div>
+
+
+<div class="col-md-6">
+  <lx-dropdown>
+  <button class="btn btn--m btn--blue btn--raised" lx-ripple lx-dropdown-toggle>
+    Category
+  </button>
+
+  <lx-dropdown-menu>
+  <ul>
+    <li><a class="dropdown-link" ng-click="dropdownAlert()">Notification</a></li>
+    <li><a class="dropdown-link">Another action</a></li>
+    <li><a class="dropdown-link">Something else here</a></li>
+    <li class="dropdown-divider"></li>
+    <li><span class="dropdown-link dropdown-link--is-header">Header</span></li>
+    <li><a class="dropdown-link">Separated link</a></li>
+  </ul>
+</lx-dropdown-menu>
+</lx-dropdown>
+</div>
+<div class="grid__col4">
+  <lx-dropdown>
+  <button class="btn btn--m btn--blue btn--raised" lx-ripple lx-dropdown-toggle>
+    Time
+  </button>
+
+  <lx-dropdown-menu>
+  <ul>
+    <li><a class="dropdown-link" ng-click="dropdownAlert()">Notification</a></li>
+    <li><a class="dropdown-link">Another action</a></li>
+    <li><a class="dropdown-link">Something else here</a></li>
+    <li class="dropdown-divider"></li>
+    <li><span class="dropdown-link dropdown-link--is-header">Header</span></li>
+    <li><a class="dropdown-link">Separated link</a></li>
+  </ul>
+</lx-dropdown-menu>
+</lx-dropdown>
+</div>
+<div class="col-md-6">
+  <button class="btn btn--m btn--green btn--raised" lx-ripple ng-click="addNewEvent()">Submit</button>  
+</div>
+</div>
+</div>
+
+<!-- EVENT DIALOG -->
+<div class="col-md-10">
+  <input type="text" class="form-control" value="09:30">
+
+</div>
+
+<lx-dialog class="dialog dialog--l" id="test" onclose="closingDialog()">
+<div class="dialog__header">
+  <div class="toolbar bgc-light-blue-500">
+    <span class="toolbar__label tc-white fs-title">
+      {{dialog.Title}} by {{dialog.Host}}
+    </span>
+
+  </div>
+</div>
+
+<div class="dialog__content">
+  <lx-tabs links-tc="light" links-bgc="light-blue-500" indicator="yellow-500" no-divider="true" layout="inline">
+  <lx-tab heading="{{dialog.Date}}">
+  <div class="p">
+    {{dialog.Description}}
+  </div>
+</lx-tab>
+</lx-tabs>
+</div>
+
+<div class="dialog__actions">
+  <button class="btn btn--m btn--black btn--flat" lx-ripple lx-dialog-close>Cancel</button>
+</div>
+</lx-dialog>
+
+<!-- LIST OF EVENTS -->
+<div class="data-table-container">
+  <table class="data-table data-table--has-primary data-table--has-secondary">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Event Name</th>
+        <th>Date</th>
+        <th>Category</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr class="data-table__clickable-row" ng-repeat="event in events | orderBy:'eventDate'">
+        <td>
+        </td>
+        <td>
+          <span>{{event.eventName}} </span>
+        </td>
+        <td>
+          <span>{{event.eventDisplay}}</span>
+        </td>
+        <td>
+          <span><button class="btn btn--s btn--orange btn--raised">Recruiting</button></span>
+        </td>
+        <td>
+          <button class="btn btn--l btn--black btn--icon" lx-ripple ng-click="opendDialog(event)">
+            <i class="mdi mdi--expand-more"></i>
+          </button>
+
+        </td>
+      </tr>
+
+      
+    </tbody>
+  </table>
+</div>
+
+</script>
+
+<script type="text/ng-template" id="/landing.html">
+  <button type="button" ng-click="test()">TEST</button>
+  <div class="page-header">
+    <h3>Landing page
+    </h3>
+    <div class="container">
+
+      <div class="jumbotron text-center">
+        <h1><span class="fa fa-lock"></span> Node Authentication</h1>
+
+        <p>Login or Register with:</p>
+
+        <a href="/auth/google" class="btn btn-danger"><span class="fa fa-google-plus"></span> Google</a>
+        <br>
+        <a href="/auth/pocket" class="btn btn-danger"><span class="fa fa-google-plus"></span> Pocket</a>
+
+      </div>
+    </span>
+  </div>
+
 
 
 
 <!-- End Document
 	–––––––––––––––––––––––––––––––––––––––––––––––––– -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
 	<script src="./javascripts/bootstrap.min.js"></script>
+          <script src="./javascripts/jquery-clockpicker.min.js"></script>
+      <script>
+      $(document).ready(function() {
+        var clock = $('.form-control');
+        
+        clock.clockpicker('show');
+
+        });
+      </script>
 </body>
 </html>
