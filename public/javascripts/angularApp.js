@@ -30,7 +30,7 @@ app.factory('friends', ['$http', function($http){
 function sortOn(collection, name){
 	collection.sort(
 		function(a, b){
-			if (a[name] <= b[name]){
+			if (a[name] > b[name]){
 				return (1);
 			}
 			else return -1;
