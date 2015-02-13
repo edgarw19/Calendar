@@ -1,4 +1,4 @@
-var app = angular.module('flapperNews', ['ui.router', 'lumx', 'clock', 'bootstrap-tagsinput']);
+var app = angular.module('flapperNews', ['ui.router', 'lumx', 'clock', 'ngTagsInput']);
 
 
 
@@ -43,7 +43,7 @@ app.controller('MainCtrl', [
 		$scope.events = friends.events;
 		$scope.showEvent = false;
 		$scope.dialog = {};
-		$scope.extraTags = [];
+		$scope.extraTags= [];
 		var category = {};
 		$scope.category = "Choose Category";
 		$scope.groupBy = function(attribute){

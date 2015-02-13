@@ -75,11 +75,11 @@ passport.use(new GoogleStrategy({
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+  res.render('home', { title: 'Express' });
 });
 
-router.get('/home', function(req, res){
-  res.render('home');
+router.get('/TigerEvents', function(req, res){
+  res.render('index');
 });
 
 router.get('/events', function(req, res, next) {
