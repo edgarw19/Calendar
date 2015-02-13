@@ -1,4 +1,4 @@
-var app = angular.module('flapperNews', ['ui.router', 'lumx', 'clock', 'ngTagsInput']);
+var app = angular.module('flapperNews', ['ui.router', 'lumx', 'clock']);
 
 
 
