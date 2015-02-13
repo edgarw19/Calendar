@@ -75,7 +75,7 @@ passport.use(new GoogleStrategy({
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('home', { title: 'Express' });
+  res.render('index', { title: 'Express' });
 });
 
 router.get('/TigerEvents', function(req, res){
