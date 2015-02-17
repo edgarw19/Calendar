@@ -285,7 +285,7 @@ app.controller('MainCtrl', [
 			});*/
 			$scope.clearEventForm();
 			$scope.showEventForm();
-			LxNotificationService.notify('Event Submitted! Refresh page!');
+			LxNotificationService.info('Event Submitted for Review!');
 		};
 		$scope.showEventForm = function(){
 			$scope.showEvent = !$scope.showEvent;
