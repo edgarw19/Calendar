@@ -1,21 +1,85 @@
-var app = angular.module('flapperNews', ['ui.router', 'lumx', 'clock']);
+var app = angular.module('flapperNews', ['ui.router', 'lumx', 'clock', 'ngTagsInput']);
 
 
 
 
 
-app.factory('friends', ['$http', function($http){
+app.factory('friends', ['$http', '$q', function($http, $q){
 	var o = {
 		events: [],
 		months: ["Jan", "Feb", "March", "April", "May", "June",
 		"July", "Aug", "Sept", "Oct", "Nov", "Dec"],
 		days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-		categories: ["Club", "Off-Campus", "Recruiting", "Talk/Discussion", "University Event"],
-		colors: ["green", "red", "blue", "grey", "orange"]
-	};  
+		categories: ["Club", "Off-Campus", "Recruiting", "Talk/Discussion", "University Event", "Performance"],
+		colors: ["green", "red", "blue", "grey", "orange", "purple"],
+		userPrefs: [],
+		preferences: [
+    		{ "text": "Art", isPref: false , checked: ""},
+    		{ "text": "Consulting", isPref: false, checked: "" },
+    		{ "text": "Dance", isPref: false, checked: "" },
+    		{ "text": "Energy", isPref: false, checked: "" },
+    		{ "text": "Entrepreneurship", isPref: false, checked: "" },
+    		{ "text": "Faith", isPref: false, checked: "" },
+    		{ "text": "Finance", isPref: false, checked: "" },
+    		{ "text": "Food", isPref: false, checked: "" },
+    		{ "text": "Internships", isPref: false, checked: "" },
+    		{ "text": "Law", isPref: false, checked: "" },
+    		{ "text": "Marketing", isPref: false, checked: "" },
+    		{ "text": "Medicine", isPref: false, checked: "" },
+    		{ "text": "Music" , isPref: false, checked: ""},
+    		{ "text": "Nonprofit" , isPref: false, checked: ""},
+    		{ "text": "Party" , isPref: false, checked: ""},
+    		{ "text": "Technology", isPref: false, checked: "" },
+    		{ "text": "Volunteer", isPref: false, checked: "" },
+  					]
+		};
+	 var tags = [
+    { "text": "Art" },
+    { "text": "Consulting" },
+    { "text": "Dance" },
+    { "text": "Energy" },
+    { "text": "Entrepreneurship" },
+    { "text": "Faith" },
+    { "text": "Finance" },
+    { "text": "Food" },
+    { "text": "Internships" },
+    { "text": "Law" },
+    { "text": "Marketing" },
+    { "text": "Medicine" },
+    { "text": "Music" },
+    { "text": "Nonprofit" },
+    { "text": "Party" },
+    { "text": "Technology" },
+    { "text": "Volunteer" },
+  ];
+  o.load = function(query){
+  	var deferred = $q.defer();
+  	var autoTags = [];
+  	console.log(query);
+  	var re = new RegExp(query, "i");
+  	for (var i = 0; i < tags.length; i++){
+  		if (re.test(tags[i].text)){
+  			autoTags.push(tags[i]);
+  		}
+  	}
+  	if (autoTags.length > 0){
+  		console.log("YES");
+  		deferred.resolve(autoTags);
+  	}
+  	else {
+  		console.log("NO");
+  	deferred.resolve(tags);
+  	}
+  	return deferred.promise;
+  } 
 	o.getAll = function(){
 		return $http.get('/events').success(function(data){
 			angular.copy(data, o.events);//makes UI update correctly
+		});
+	};
+	o.test = function(suggestion){
+		return $http.post('/autocomplete', suggestion).success(function(data){
+			console.log(data);
 		});
 	};
 	o.create = function(event){
@@ -24,6 +88,17 @@ app.factory('friends', ['$http', function($http){
 			o.events.push(data);
 		});
 	};
+	o.addToCal = function(event){
+		return $http.post('/addToCal', event).success(function(data){
+			console.log(data);
+		});
+	};
+	o.postUserPrefs = function(prefs){
+		console.log(prefs);
+		return $http.post('/userprefs', prefs).success(function(data){
+			console.log(data);
+		});
+	}
 	return o;
 }]);
 
@@ -37,24 +112,52 @@ function sortOn(collection, name){
 		});
 };
 
+function stringToUTC(timeString){
+	console.log(timeString);
+	var time = Number(timeString.substring(0, 2))*3600000;
+	if (timeString.length > 4 && timeString.substring(5, 7) == "AM"){
+	} 
+	else if (timeString.substring(0,2) === "12"){
+	} else {
+		time += 12*3600000;
+	}
+	time += Number(timeString.substring(3, 5))*60000;
+	console.log(time);
+	return time;
+};
+
+
 app.controller('MainCtrl', [
-	'$scope', 'friends', 'LxDialogService', 'LxNotificationService',
-	function($scope, friends, LxDialogService, LxNotificationService){//friends must be passed in
+	'$scope', 'friends', 'LxDialogService', 'LxNotificationService', '$http',
+	function($scope, friends, LxDialogService, LxNotificationService, $http){//friends must be passed in
 		$scope.events = friends.events;
 		$scope.showEvent = false;
 		$scope.dialog = {};
 		$scope.extraTags= [];
+		$scope.isShowPreference = false;
 		var category = {};
 		$scope.category = "Choose Category";
+		$scope.tags = [];
+		$scope.prefGroups = [];
+		$scope.loadItems = function(query){
+			return friends.load(query);
+		};
+		friends.userPrefs = friends.preferences;
+		$scope.showPreferences= function(){
+			$scope.isShowPreference = !$scope.isShowPreference;
+		}
 		$scope.groupBy = function(attribute){
 			$scope.groups = [];
-			sortOn($scope.events, attribute);
+			//sortOn($scope.events, attribute);
 			var groupValue = "_INVALID_GROUP_VALUE_";
 			for (var i = 0; i < $scope.events.length; i++){
 				var event = $scope.events[i];
 				if (event[attribute] !== groupValue){
+					var dateSplit = event[attribute].split(",");
 					var group = {
 						label: event[attribute],
+						day: dateSplit[0],
+						date: dateSplit[1],
 						events: []
 					};
 					groupValue = group.label;
@@ -63,21 +166,62 @@ app.controller('MainCtrl', [
 				group.events.push(event);
 			}
 		};
+
+		$scope.changePreference = function(categoryString){
+			for (var i = 0; i < friends.userPrefs.length; i++){
+				if (friends.userPrefs[i].text === categoryString){
+					if (friends.userPrefs[i].checked.length > 0){
+						friends.userPrefs[i].checked = "";
+					}
+					else {
+						friends.userPrefs[i].checked = "checked";
+					}
+					friends.userPrefs[i].isPref = !friends.userPrefs[i].isPref;
+					break;
+				}
+			}
+		}
+		$scope.confirmPreferences = function(){
+			friends.postUserPrefs(friends.userPrefs);
+		}
 		$scope.groupBy('eventDisplay');
 		$scope.setCategory = function(number){
 			category.color = friends.colors[number];
 			category.name = friends.categories[number];
 			$scope.category = category.name;
 		};
-		$scope.test = function(){
-			console.log($scope.groups);
+		$scope.loadPreferences = function(){
+			var n = friends.preferences.length;
+			var prefGroups = [];
+			var individualPrefs = [];
+			for (var i = 0; i < n; i++){
+				if (i != 4)	individualPrefs.push(friends.preferences[i]);
+				if ((i)%4 == 0 && i != 0){
+					prefGroups.push(individualPrefs);
+					if (i == 4) individualPrefs.push(friends.preferences[i]);
+					individualPrefs = [];
+				}
+				else if (i === n-1 && individualPrefs.length != 0){
+				}
+				else {
+				}
+			}
+			$scope.prefGroups = prefGroups;
+		};
+		$scope.loadPreferences();
+		$scope.addtoCal = function(event){
+			friends.addToCal(event);
 		};
 		$scope.setDialog = function(event){
-			console.log(event);
+
 			$scope.dialog.Title = event.eventName;
 			$scope.dialog.Date = event.eventDisplay;
 			$scope.dialog.Description = event.eventDescription;
 			$scope.dialog.Host = event.eventHost;
+			$scope.dialog.fullEvent = event;
+			if(event.tags){
+				$scope.dialog.Tags = event.tags;
+			}
 			if (event.startTimeString && event.endTimeString){
 			$scope.dialog.Time = event.startTimeString.substring(0, 5) + "-" + event.endTimeString;
 			}
@@ -95,43 +239,47 @@ app.controller('MainCtrl', [
 
 		};
 		$scope.clearEventForm = function(){
-			$scope.eventName = "";
-			$scope.eventHost = "";
-			$scope.eventDescription = "";
+			//$scope.eventName = "";
+			//$scope.eventHost = "";
+			//$scope.eventDescription = "";
 			$scope.category = "CATEGORY";
 		};
 		$scope.addNewEvent = function(){
 			//Find the time
-			if(!$scope.eventName || !$scope.eventHost || ($scope.eventDescription === "CATEGORY")  
-				|| !$scope.startTime || !$scope.endTime || !$scope.startTime)
+			if(!$scope.eventName || !$scope.eventHost || ($scope.category === "CATEGORY")  
+				|| !$scope.startTime || !$scope.endTime || !$scope.startTime || !$scope.eventDate)
 				{
 					$scope.submissionError = "Missing a required field";
 					return;
 				}
 				$scope.submissionError = "";
-			var timeString = $scope.startTime;
-			var timeNumber = Number(timeString.substring(0, 2));
-			if (timeString.length > 4 && timeString.substring(5, 7) == "AM"){
-			} 
-			else {
-				timeNumber += 12;
-			}
+			var timeStart = stringToUTC($scope.startTime);
+			console.log($scope.startTime);
+			var timeEnd = stringToUTC($scope.endTime);
+			console.log(timeStart);
 			//Find the date
 			var newDate = new Date($scope.eventDate);
 			var eventString = friends.days[newDate.getDay()] + ", ";
 			eventString += friends.months[newDate.getMonth()] + " " + newDate.getDate();
-			console.log(eventString);
+			var tagArray = [];
+			for (var i = 0; i < $scope.tags.length; i++){
+				tagArray.push($scope.tags[i].text);
+			}
+
 			//Create Event
 			friends.create({
 				eventName: $scope.eventName,
 				eventHost: $scope.eventHost,
 				eventDescription: $scope.eventDescription,
-				eventUTC: (newDate.getTime()+timeNumber),
+				eventUTC: (newDate.getTime()+timeStart),
 				eventDisplay: eventString,
 				category: category.name,
 				categoryColor: category.color,
 				startTimeString: $scope.startTime,
 				endTimeString: $scope.endTime,
+				tags: tagArray,
+				eventStartUTC: (newDate.getTime()+timeStart),
+				eventEndUTC: (newDate.getTime()+timeEnd)
 			});
 			$scope.clearEventForm();
 			$scope.showEventForm();
@@ -177,45 +325,6 @@ app.controller('MainCtrl', [
 // 			$scope.body = '';
 // 		}
 // 	
-app.controller('friendsCtrl', ['$scope', 'friend', 'notes', 'friends',
-	function($scope, friend, notes, friends){
-		$scope.doComment = false;
-		$scope.friend = friend;
-		$scope.notes = notes;
-		for (var i = 0; i < $scope.notes.length; i++){
-			console.log($scope.notes[i]);
-		};
-		$scope.test = function(){
-			friends.test();
-		};
-		$scope.addNotes = function(){
-			if($scope.note === ''){return;}
-			var curDate = new Date();
-			var _dateString = "" + friends.months[curDate.getMonth()] +"-" + curDate.getFullYear();
-			var newNote = {
-				note: $scope.note,
-				date: curDate.getTime(),
-				dateString: _dateString
-			};
-			friends.addNote(friend._id, newNote).success(function(note){
-				newNote._id = note._id;
-				$scope.notes.push(newNote);
-			});
-			$scope.note = '';
-		};
-		$scope.deleteNote = function(note, index){
-			console.log(note);
-			console.log("delete");
-			//friends.deleteNote(friend._id, note);
-			$scope.notes.splice(index, 1);
-		};
-
-		$scope.showComment = function(){
-			console.log(notes);
-			console.log(friend);
-			$scope.doComment = !$scope.doComment;
-		};
-	}]);
 
 app.controller('landCtrl', ['$scope', 'friends', function($scope, friends){
 	$scope.test = function(){
@@ -226,11 +335,7 @@ app.controller('landCtrl', ['$scope', 'friends', function($scope, friends){
 app.config(['$httpProvider','$stateProvider', '$urlRouterProvider', 
 	function($httpProvider,$stateProvider, $urlRouterProvider){
 
-		$httpProvider.defaults.useXDomain = true;
-		$httpProvider.defaults.withCredentials = true;
-		delete $httpProvider.defaults.headers.common["X-Requested-With"];
-		$httpProvider.defaults.headers.common["Accept"] = "application/json";
-		$httpProvider.defaults.headers.common["Content-Type"] = "application/json";
+		
 		$stateProvider.state('home',{
 			url: '/home', 
 			templateUrl: '/home.html',

@@ -4,11 +4,14 @@
 	<link rel="stylesheet" href="bower_components/lumx/dist/css/lumx.css">
 	<link href="./stylesheets/bootstrap.css" rel="stylesheet">
 	<link href="./stylesheets/jquery-clockpicker.min.css" rel="stylesheet">
+  <link href="./stylesheets/ng-tags-input.css" rel="stylesheet">
+  <link href="./stylesheets/ng-tags-input.bootstrap.css" rel="stylesheet">
+
   <link href="./stylesheets/angularApp.css" rel="stylesheet">
 
 
 </head>
-<body ng-app="flapperNews" style="background-color: rgba(255, 255, 255, 0.5)">
+<body ng-app="flapperNews" style="background-color: rgba(255, 255, 255, .8)">
 	<div class="row">
 		<div class="col-md-10 col-md-offset-1">
 			<ui-view></ui-view>
@@ -20,32 +23,66 @@
 
 <div class="col-md-4">
   <h1>Tiger Events</h1>
+  <h4 style="color: gray">The best events on campus, everyday</h4>
 </div>
+
+<div class="col-md-10">
+<br>
+    </div>
 
 <div class="col-md-10">
         <div class="card">
             <div class="toolbar">
-                <lx-search-filter model="searchTerm" filter-width="100%" placeholder="Search"></lx-search-filter>
+                <lx-search-filter model="searchTerm" filter-width="100%" placeholder="Search by name, location, category"></lx-search-filter>
             </div>
         </div>
     </div>
-<div class="col-md-4">
-      <button class="btn btn--m btn--blue btn--raised" ng-click="showEventForm()" lx-ripple>Add Event</button>  
+
+      <div class="col-md-4">
+      <button class="btn btn--m btn--orange btn--raised" ng-click="showEventForm()" lx-ripple>Add Event!</button>  
       </div>
+      <!-- <div class="col-md-4">
+      <button class="btn btn--m btn--orange btn--raised" ng-click="showPreferences()" lx-ripple>Favorite Categories!</button>  
+      </div> -->
 
 
 
 <div class="col-md-12">
   <!-- <button class="btn btn--m btn--blue btn--raised" ng-click="test()" lx-ripple>TEST</button>   --> 
+
+  <!-- CHANGE PREFERENCES FORM -->
+  <div class="data-table-container" ng-show="isShowPreference" style="background-color: rgba(255, 255, 255, .7)" id="changePrefDiv">
+    <table class="data-table data-table--has-primary data-table--has-secondary">
+        <thead>
+        <tr><h3 style="color:gray">Favorite Categories</h3></tr><tr></tr>
+
+
+      
+            <tr class="data-table__clickable-row" ng-repeat="pref in prefGroups">
+                <td ng-repeat="category in pref">
+                  <div class="checkbox">
+                    <input type="checkbox" id="checkbox{{$parent.$index*4 + $index}}" class="checkbox__input" ng-click="changePreference(category.text)" {{category.checked}}>
+                    <label style="color:gray" for="checkbox{{$parent.$index*4 + $index}}" class="checkbox__label" >{{category.text}}</label>
+                  </div>
+                </td>
+            </tr>
+
+            
+        </thead>
+    </table>
+            <div class="col-md-4">
+      <button class="btn btn--m btn--green btn--raised" ng-click="confirmPreferences()" lx-ripple>Confirm Categories</button>  
+      </div>
+</div>    
   <!--  ADD EVENT FORM -->
-  <div class="grid" ng-show="showEvent" style="background-color: rgba(255, 255, 255, .7)">
+  <div class="grid" ng-show="showEvent" style="background-color: rgba(255, 255, 255, .7)" id="addEventDiv">
     <div class="col-md-4">
-      <lx-text-field label="Event Name">
+      <lx-text-field label="Event Name*">
       <input type="text" ng-model="eventName">
     </lx-text-field>
   </div>
   <div class="col-md-4">
-    <lx-text-field label="Location">
+    <lx-text-field label="Location*">
     <input type="text" ng-model="eventHost">
   </lx-text-field>
 </div>
@@ -57,25 +94,25 @@
 <br>
 
 <div class="col-md-3">
-  <lx-date-picker label="Pick a date" model="eventDate" >Pick a date</lx-date-picker>
+  <lx-date-picker label="Pick a date*" model="eventDate" >Pick a date</lx-date-picker>
 </div>
   <div class="col-md-2">
-    <lx-text-field label="Start Time">
+    <lx-text-field label="Start Time*">
     <input type="text" clock ng-model="startTime">
   </lx-text-field>
 </div>
   <div class="col-md-2">
-    <lx-text-field label="End Time">
+    <lx-text-field label="End Time*">
     <input type="text" clock ng-model="endTime">
   </lx-text-field>
 </div>
 
 <div class="col-md-1">
 
-  <lx-dropdown>
+   <lx-dropdown>
 <lx-text-field>
   <button class="btn btn--m btn--blue btn--raised" lx-ripple lx-dropdown-toggle>
-    {{category}}
+    {{category + "*"}}
   </button>
    </lx-text-field>
 
@@ -86,10 +123,16 @@
     <li><a class="dropdown-link" ng-click="setCategory(2)">Recruiting</a></li>
     <li><a class="dropdown-link" ng-click="setCategory(3)">Talk/Discussion</a></li>
     <li><a class="dropdown-link" ng-click="setCategory(4)">University Event</a></li>
+    <li><a class="dropdown-link" ng-click="setCategory(5)">Performance</a></li>
   </ul>
 </lx-dropdown-menu>
 </lx-dropdown>
-
+<br><br>
+</div>
+  <div class="col-md-6">
+  <tags-input ng-model="tags" style="height: 40px">
+  <auto-complete source="loadItems($query)"></auto-complete>
+</tags-input>
 </div>
 
 <br><br>
@@ -127,10 +170,19 @@
   <div class="p">
     {{dialog.Description}}
   </div>
+  <div class="p">
+  <h5>Tags</h5>
+  <p ng-repeat="tag in dialog.Tags">{{tag}}
+
+  </p>
+  </div>
 </lx-tab>
 </lx-tabs>
 </div>
-
+<div class="dialog__actions">
+  <button class="btn btn--m btn--black btn--flat" lx-ripple ng-click="addtoCal(dialog.fullEvent)">Add to Cal</button>
+</div>
+</lx-dialog>
 <div class="dialog__actions">
   <button class="btn btn--m btn--black btn--flat" lx-ripple lx-dialog-close>Cancel</button>
 </div>
@@ -139,7 +191,7 @@
 <!-- LIST OF EVENTS -->
 <div class="data-table-container" ng-repeat="group in groups">
 <br><br><br>
-<h2 class="text-center" style="color:"><b>{{group.label}}</b></h2>
+<h2 class="text-left" style="color:"><b>{{group.day}}</b>     <span>{{group.date}}</span></h2> 
 
   <table class="data-table data-table--has-primary data-table--has-secondary">
     <thead>
@@ -154,13 +206,13 @@
     <tbody>
       <tr class="data-table__clickable-row" ng-repeat="event in group.events | orderBy:'eventDate' | filter: searchTerm">
         <td>
-          <span><h4><b>{{event.startTimeString}}</b></h4></span>
+          <span><h4 ><b>{{event.startTimeString}}</b></h4></span>
         </td>
         <td>
-          <span><h4><b>{{event.eventName}}</b></h4> </span>
+          <span><h4 style="color:gray"><b>{{event.eventName}}</b></h4> </span>
         </td>
         <td>
-        	<span><h4><b>{{event.eventHost}}</b></h4></span>
+        	<span><h4 style="color:gray"><b>{{event.eventHost}}</b></h4></span>
         </td>
         <td>
           <span><button class="btn btn--s btn--{{event.categoryColor}} btn--raised">{{event.category}}</button></span>
@@ -193,6 +245,7 @@
 
 <script src="./bower_components/lumx/dist/js/lumx.js"></script>
 <script src="./javascripts/clockpicker.js"></script>
+<script src="./javascripts/ng-tags-input.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.10/angular-ui-router.js"></script>
 <script src="/javascripts/angularApp.js"></script>

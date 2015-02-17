@@ -1,14 +1,14 @@
 var mongoose = require('mongoose');
 var UserSchema = new mongoose.Schema({
 	userName: String,
-	friends: [String],
 	googleId: {
 		id: String,
 		token: String,
+		refreshToken: String,
 		email: String,
 		name: String},
-	eventsLiked: [],
-	eventsAttending: []
+	eventsAdded: [],
+	eventPreferences: []
 });
 
 module.exports = mongoose.model('User', UserSchema);	

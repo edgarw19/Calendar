@@ -12,7 +12,9 @@ var EventSchema = new mongoose.Schema({
 	categoryColor: String,
 	startTimeString: String,
 	endTimeString: String,
-	tags: []
+	tags: [String],
+	eventStartUTC: Number,
+	eventEndUTC: Number
 
 
 });

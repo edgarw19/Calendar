@@ -3,10 +3,12 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var Events = require('../models/Events.js');
+var AutoComplete = require('../models/autoComplete.js');
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-
+var googleCal = require('google-calendar');
 var request = require('request');
+var moment = require('moment');
 
 
 
@@ -41,32 +43,32 @@ passport.use(new GoogleStrategy({
        appUser.googleId.refreshToken = refreshToken;
        appUser.lastTime = new Date();
        return done(null, appUser);
-      } 
-      else {
+     } 
+     else {
       var email = profile.emails[0].value;
       var n = email.search(/@princeton.edu$/);
       console.log(email);
       console.log(n);
-      }
-      if (n < 0)
-      {
-        return done(null, false, {message: "Invalid _@princeton.edu address"});
-      }
-      else 
-      {
-        var newUser = new User();
-        newUser.googleId.id = profile.id;
-        newUser.googleId.token = token;
-        newUser.googleId.refreshToken = refreshToken;
-        newUser.googleId.name  = profile.displayName;
-        newUser.lastTime = new Date();
-        newUser.googleId.email = profile.emails[0].value;
-        newUser.save(function(err){
-          if (err) throw err;
-          return done(null, newUser);
-        });
-      }
-    });
+    }
+    if (n < 0)
+    {
+      return done(null, false, {message: "Invalid _@princeton.edu address"});
+    }
+    else 
+    {
+      var newUser = new User();
+      newUser.googleId.id = profile.id;
+      newUser.googleId.token = token;
+      newUser.googleId.refreshToken = refreshToken;
+      newUser.googleId.name  = profile.displayName;
+      newUser.lastTime = new Date();
+      newUser.googleId.email = profile.emails[0].value;
+      newUser.save(function(err){
+        if (err) throw err;
+        return done(null, newUser);
+      });
+    }
+  });
   });
 }));
 
@@ -75,37 +77,134 @@ passport.use(new GoogleStrategy({
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+  res.render('home', { title: 'Express' });
 });
 
-router.get('/TigerEvents', function(req, res){
+router.get('/autocomplete', function(req, res) {
+  var searchItem = req.query.q;
+  AutoComplete.find({}).select("category").lean().exec(function(err, suggestions){
+    return res.json(suggestions);
+  });
+
+});
+
+router.get('/TigerEvents', isLoggedIn, function(req, res){
+  console.log(req.user);
   res.render('index');
 });
 
-router.get('/events', function(req, res, next) {
-    var cutOff = new Date().getTime();
-  Events.find({eventUTC: {$gt: cutOff}}, function(err, events){
+router.get('/events', isLoggedIn, function(req, res, next) {
+  console.log("here");
+  var cutOff = new Date().getTime();
+  console.log(moment(cutOff).format("YYYY-MM-DDTHH:mm:ssZ"));
+  var upperCutoff = cutOff + 864000000;
+  var preferences = [];
+  console.log(cutOff);
+  var query = Events.find({eventUTC: {$gt: cutOff, $lt: upperCutoff}});
+  /*if (req.user.eventPreferences.length > 0){
+    var userPrefs = req.user.eventPreferences;
+    console.log("grabbinb preferences!");
+    console.log(userPrefs);
+    for (var i = 0; i< userPrefs.length; i++){
+      if (userPrefs[i].isPref){
+        preferences.push(userPrefs[i].text);
+      }
+    }
+    query.find({tags: {$in: preferences}});
+  }*/
+  query.sort({eventUTC: 'asc'});
+  query.exec(function(err, events){
     res.json(events);
   });
 });
 
-router.post('/events', function(req, res, next) {
-  var newEvent = new Events(req.body);
-  newEvent.save(function(err, savedEvent){
-    if (err){return next(err)};
-      res.json(savedEvent);
+router.post('/autocomplete', function(req, res, next) {
+  var newSuggestion = new AutoComplete(req.body);
+  console.log("req.body");
+  newSuggestion.save(function(err, suggestion){
+    if (err){console.log(err);return next(err)};
+    console.log(suggestion);
+    res.json(suggestion);
   });
 });
 
+
+
+/*router.post('/userprefs', isLoggedIn, function(req, res, next) {
+  req.user.eventPreferences = req.body;
+  req.user.save(function(err, savedUser){
+    console.log(savedUser);
+    if (err) return next(err);
+    console.log("Before relogin" + req.session.passport.user.eventPreferences);
+    req.login(savedUser, function(err)
+    {
+      if (err) return next(err);
+      console.log("After relogin: " + req.session.passport.user.eventPreferences);
+      res.send(200);
+    });
+  })
+});*/
+
+router.post('/events', isLoggedIn, function(req, res, next) {
+  var newEvent = new Events(req.body);
+  newEvent.save(function(err, savedEvent){
+    if (err){return next(err)};
+    res.json(savedEvent);
+  });
+});
+
+router.post('/addToCal', isLoggedIn, function(req, res, next) {
+    var eventBody = {
+    'status':'confirmed',
+    'summary': event.eventName,
+    'location': event.eventHost,
+    'description': event.eventDescription,
+    'organizer': {
+      'email': googleUserId,
+      'self': true
+    },
+    'start': {
+      'dateTime': request.body.startdate,
+      'timeZone': "America/New_York"
+    },
+    'end': {
+      'dateTime': request.body.enddate,
+      'timeZone': "America/New_York"
+    },
+    'attendees': [
+        {
+          'email': req.user.googleId.email,
+          'responseStatus': 'needsAction'
+        }
+    ]
+  };
+  var google_calendar = new googleCal.GoogleCalendar(req.user.googleId.token);
+  google_calendar.events.insert(req.user.googleId.id, eventBody, function(err, response){
+    console.log("Google response:", err, response);
+    if (!err){
+      res.send(200, response);
+    }
+    else {
+      res.send(400, err);
+    }
+  });
+});
 /* Google Login routes. */
 router.get('/auth/google', passport.authenticate('google', {
-  scope:['profile', 'email'],
+  scope:['profile', 'email',"https://www.googleapis.com/auth/calendar"],
   approvalPrompt: 'force'}));
 
 router.get('/auth/google/callback',passport.authenticate('google',{
   failureRedirect: '/index'}), function(req, res){
-  res.redirect('/#/home');
+  res.redirect('/TigerEvents');
 });
+
+function isLoggedIn(req, res, next) {
+
+  if (req.isAuthenticated())
+    return next();
+  res.redirect('/');
+};
 
 
 module.exports = router;
