@@ -97,12 +97,12 @@ router.get('/autocomplete', function(req, res) {
 
 });
 
-router.get('/TigerEvents', isLoggedIn, function(req, res){
+router.get('/TigerEvents', function(req, res){
   console.log("USER LOGGED IN" + req.user);
   res.render('index');
 });
 
-router.get('/events', isLoggedIn, function(req, res, next) {
+router.get('/events', function(req, res, next) {
   console.log("got to events");
   var cutOff = new Date().getTime();
   console.log(moment(cutOff).format("YYYY-MM-DDTHH:mm:ssZ"));
@@ -155,7 +155,7 @@ router.post('/autocomplete', function(req, res, next) {
   })
 });*/
 
-router.post('/events', isLoggedIn, function(req, res, next) {
+router.post('/events', function(req, res, next) {
   console.log("Adding a new event");
   var newEvent = new Events(req.body);
   newEvent.save(function(err, savedEvent){
