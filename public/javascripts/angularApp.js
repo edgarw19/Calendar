@@ -211,6 +211,7 @@ app.controller('MainCtrl', [
 		$scope.loadPreferences();
 		$scope.addToCal = function(event){
 			friends.addToCal(event);
+			LxNotificationService.notify('Added to your GCal!');
 		};
 		$scope.setDialog = function(event){
 
@@ -287,7 +288,6 @@ app.controller('MainCtrl', [
 			LxNotificationService.notify('Event Submitted! Refresh page!');
 		};
 		$scope.showEventForm = function(){
-			$scope.addToCal({"name": "bob"});
 			$scope.showEvent = !$scope.showEvent;
 		};
 		$scope.incrementUpvotes = function(post){

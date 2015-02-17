@@ -38,9 +38,9 @@ passport.use(new GoogleStrategy({
 }, function(token, refreshToken, params, profile, done){
   process.nextTick(function(){
 
-   
+
     User.findOne({'googleId.id': profile.id}, function(err, appUser){
-      
+
       if (err) return done(err);
       if (appUser){
 
@@ -56,7 +56,7 @@ passport.use(new GoogleStrategy({
      else {
       var email = profile.emails[0].value;
       var n = email.search(/@princeton.edu$/);
-      
+
       if (n < 0)
       {
         return done(null, false, {message: "Invalid _@princeton.edu address"});
@@ -163,17 +163,18 @@ router.post('/events', isLoggedIn, function(req, res, next) {
 });
 
 router.post('/addToCal', isLoggedIn, function(req, res, next) {
+    var newEvent = new Events(req.body);
     var eventBody = {
     'status':'confirmed',
-    'summary': "Test summary of event",
-    'location': "Dod basement",
-    'description': "COME BY AND HAVE A LOT OF FUN DESCRIPTION",
+    'summary': newEvent.eventName,
+    'location': newEvent.eventHost,
+    'description': newEvent.eventDescription,
     'start': {
-      'dateTime': moment(new Date(1424484000000)).format("YYYY-MM-DDTHH:mm:ssZ"),
+      'dateTime': moment(new Date(newEvent.eventStartUTC)).format("YYYY-MM-DDTHH:mm:ssZ"),
       'timeZone': "America/New_York"
     },
     'end': {
-      'dateTime': moment(new Date(1424491200000)).format("YYYY-MM-DDTHH:mm:ssZ"),
+      'dateTime': moment(new Date(newEvent.eventEndUTC)).format("YYYY-MM-DDTHH:mm:ssZ"),
       'timeZone': "America/New_York"
     },
     'attendees': [
