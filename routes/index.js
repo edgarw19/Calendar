@@ -12,6 +12,7 @@ var moment = require('moment');
 
 
 
+
 // PASSPORT AUTHENTICATION
 //------------------------------------------------------------------------
 passport.serializeUser(function(user, done){
@@ -36,40 +37,48 @@ passport.use(new GoogleStrategy({
   callbackURL: googleAuth.callbackURL
 }, function(token, refreshToken, params, profile, done){
   process.nextTick(function(){
+
+   
     User.findOne({'googleId.id': profile.id}, function(err, appUser){
+      
       if (err) return done(err);
       if (appUser){
+
        appUser.googleId.token = token;
        appUser.googleId.refreshToken = refreshToken;
        appUser.lastTime = new Date();
-       return done(null, appUser);
-     } 
+       appUser.save(function(err, savedUser){
+        if (err) {console.log("FIRST ERROR");throw err;}
+        console.log("The updated user is " + savedUser.googleId.token);
+        return done(null, savedUser);
+      });
+     }
      else {
       var email = profile.emails[0].value;
       var n = email.search(/@princeton.edu$/);
-      console.log(email);
-      console.log(n);
-    }
-    if (n < 0)
-    {
-      return done(null, false, {message: "Invalid _@princeton.edu address"});
-    }
-    else 
-    {
-      var newUser = new User();
-      newUser.googleId.id = profile.id;
-      newUser.googleId.token = token;
-      newUser.googleId.refreshToken = refreshToken;
-      newUser.googleId.name  = profile.displayName;
-      newUser.lastTime = new Date();
-      newUser.googleId.email = profile.emails[0].value;
+      
+      if (n < 0)
+      {
+        return done(null, false, {message: "Invalid _@princeton.edu address"});
+      }
+      else 
+      {
+        var newUser = new User();
+        newUser.googleId.id = profile.id;
+        newUser.googleId.token = token;
+        newUser.googleId.name  = profile.displayName;
+        newUser.lastTime = new Date();
+        newUser.googleId.refreshToken = refreshToken;
+        newUser.googleId.email = profile.emails[0].value;
+      //newUser.googleCal.push(google_calendar);
       newUser.save(function(err){
         if (err) throw err;
         return done(null, newUser);
       });
     }
-  });
-  });
+  }
+});
+});
 }));
 
 
@@ -112,7 +121,7 @@ router.get('/events', isLoggedIn, function(req, res, next) {
     }
     query.find({tags: {$in: preferences}});
   }*/
-  query.sort({eventUTC: 'asc'});
+  query.sort({eventStartUTC: 'asc'});
   query.exec(function(err, events){
     res.json(events);
   });
@@ -156,19 +165,15 @@ router.post('/events', isLoggedIn, function(req, res, next) {
 router.post('/addToCal', isLoggedIn, function(req, res, next) {
     var eventBody = {
     'status':'confirmed',
-    'summary': event.eventName,
-    'location': event.eventHost,
-    'description': event.eventDescription,
-    'organizer': {
-      'email': googleUserId,
-      'self': true
-    },
+    'summary': "Test summary of event",
+    'location': "Dod basement",
+    'description': "COME BY AND HAVE A LOT OF FUN DESCRIPTION",
     'start': {
-      'dateTime': request.body.startdate,
+      'dateTime': moment(new Date(1424484000000)).format("YYYY-MM-DDTHH:mm:ssZ"),
       'timeZone': "America/New_York"
     },
     'end': {
-      'dateTime': request.body.enddate,
+      'dateTime': moment(new Date(1424491200000)).format("YYYY-MM-DDTHH:mm:ssZ"),
       'timeZone': "America/New_York"
     },
     'attendees': [
@@ -178,9 +183,11 @@ router.post('/addToCal', isLoggedIn, function(req, res, next) {
         }
     ]
   };
+  console.log("TOKEN IS" + req.user.googleId.token);
   var google_calendar = new googleCal.GoogleCalendar(req.user.googleId.token);
-  google_calendar.events.insert(req.user.googleId.id, eventBody, function(err, response){
+  google_calendar.events.insert(req.user.googleId.email, eventBody, function(err, response){
     console.log("Google response:", err, response);
+
     if (!err){
       res.send(200, response);
     }
@@ -191,8 +198,7 @@ router.post('/addToCal', isLoggedIn, function(req, res, next) {
 });
 /* Google Login routes. */
 router.get('/auth/google', passport.authenticate('google', {
-  scope:['profile', 'email',"https://www.googleapis.com/auth/calendar"],
-  approvalPrompt: 'force'}));
+  scope:['profile', 'email',"https://www.googleapis.com/auth/calendar"]})); //add approvalPrompt: 'force' for offline
 
 router.get('/auth/google/callback',passport.authenticate('google',{
   failureRedirect: '/index'}), function(req, res){

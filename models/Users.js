@@ -8,7 +8,8 @@ var UserSchema = new mongoose.Schema({
 		email: String,
 		name: String},
 	eventsAdded: [],
-	eventPreferences: []
+	eventPreferences: [],
+	googleCal: []
 });
 
 module.exports = mongoose.model('User', UserSchema);	

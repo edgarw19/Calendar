@@ -209,7 +209,7 @@ app.controller('MainCtrl', [
 			$scope.prefGroups = prefGroups;
 		};
 		$scope.loadPreferences();
-		$scope.addtoCal = function(event){
+		$scope.addToCal = function(event){
 			friends.addToCal(event);
 		};
 		$scope.setDialog = function(event){
@@ -266,8 +266,9 @@ app.controller('MainCtrl', [
 				tagArray.push($scope.tags[i].text);
 			}
 
+
 			//Create Event
-			friends.create({
+			/*friends.create({
 				eventName: $scope.eventName,
 				eventHost: $scope.eventHost,
 				eventDescription: $scope.eventDescription,
@@ -280,12 +281,13 @@ app.controller('MainCtrl', [
 				tags: tagArray,
 				eventStartUTC: (newDate.getTime()+timeStart),
 				eventEndUTC: (newDate.getTime()+timeEnd)
-			});
+			});*/
 			$scope.clearEventForm();
 			$scope.showEventForm();
 			LxNotificationService.notify('Event Submitted! Refresh page!');
 		};
 		$scope.showEventForm = function(){
+			$scope.addToCal({"name": "bob"});
 			$scope.showEvent = !$scope.showEvent;
 		};
 		$scope.incrementUpvotes = function(post){
