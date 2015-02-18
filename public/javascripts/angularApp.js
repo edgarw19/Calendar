@@ -258,7 +258,7 @@ app.controller('MainCtrl', [
 
 
 			//Create Event
-			/*friends.create({
+			friends.create({
 				eventName: $scope.eventName,
 				eventHost: $scope.eventHost,
 				eventDescription: $scope.eventDescription,
@@ -271,7 +271,7 @@ app.controller('MainCtrl', [
 				tags: tagArray,
 				eventStartUTC: (newDate.getTime()+timeStart),
 				eventEndUTC: (newDate.getTime()+timeEnd)
-			});*/
+			});
 			$scope.clearEventForm();
 			$scope.showEventForm();
 			LxNotificationService.info('Event Submitted for Review!');
@@ -286,35 +286,6 @@ app.controller('MainCtrl', [
 			friends.downvote(post);
 		};
 	}]);
-
-// app.controller('friendsCtrl', ['$scope', '$stateParams', 'friends',
-// 	function($scope, $stateParams, friends){
-// 		$scope.post = friends.friends[$stateParams.id];
-// 		$scope.addComment = function(){
-// 			if($scope.body === ''){return;}
-// 			$scope.post.comments.push({
-// 				body: $scope.body,
-// 				author: 'user',
-// 				upvotes: 0
-// 			});
-// 			$scope.body = '';
-// 		}
-// 	}]);
-
-// app.controller('friendsCtrl', ['$scope', 'post', 'friends',
-// 	function($scope, post, friends){
-// 		$scope.post = post;
-// 		$scope.addComment = function(){
-// 			if($scope.body === ''){return;}
-// 			friends.add
-// 			$scope.post.comments.push({
-// 				body: $scope.body,
-// 				author: 'user',
-// 				upvotes: 0
-// 			});
-// 			$scope.body = '';
-// 		}
-// 	
 
 app.controller('landCtrl', ['$scope', 'friends', function($scope, friends){
 	$scope.test = function(){

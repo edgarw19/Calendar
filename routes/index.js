@@ -158,11 +158,18 @@ router.post('/autocomplete', function(req, res, next) {
 router.post('/events', isLoggedIn, function(req, res, next) {
   console.log("Adding a new event");
   var newEvent = new Events(req.body);
-  newEvent.save(function(err, savedEvent){
-    if (err){return next(err)};
-    console.log("new event added" + savedEvent);
-    res.json(savedEvent);
-  });
+  if (req.user.postPermission){
+    newEvent.save(function(err, savedEvent){
+      if (err){return next(err)};
+      console.log("new event added" + savedEvent);
+      res.json(savedEvent);
+    });
+  }
+  else {
+    console.log("no permission");
+    res.json(200);
+  }
+
 });
 
 router.post('/addToCal', isLoggedIn, function(req, res, next) {
