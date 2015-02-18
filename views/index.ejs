@@ -204,6 +204,18 @@
       </tr>
     </thead>
     <tbody>
+    <tr class="data-table__clickable-row">
+        <td>        
+        </td>
+        <td>         
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+      </tr>
       <tr class="data-table__clickable-row" ng-repeat="event in group.events | orderBy:'eventDate' | filter: searchTerm" ng-click="opendDialog(event)">
         <td>
           <span><h4 ><b>{{event.startTimeString}}</b></h4></span>
