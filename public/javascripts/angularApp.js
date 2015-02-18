@@ -55,7 +55,6 @@ app.factory('friends', ['$http', '$q', function($http, $q){
   o.load = function(query){
   	var deferred = $q.defer();
   	var autoTags = [];
-  	console.log(query);
   	var re = new RegExp(query, "i");
   	for (var i = 0; i < tags.length; i++){
   		if (re.test(tags[i].text)){
@@ -63,11 +62,9 @@ app.factory('friends', ['$http', '$q', function($http, $q){
   		}
   	}
   	if (autoTags.length > 0){
-  		console.log("YES");
   		deferred.resolve(autoTags);
   	}
   	else {
-  		console.log("NO");
   	deferred.resolve(tags);
   	}
   	return deferred.promise;
@@ -79,12 +76,10 @@ app.factory('friends', ['$http', '$q', function($http, $q){
 	};
 	o.test = function(suggestion){
 		return $http.post('/autocomplete', suggestion).success(function(data){
-			console.log(data);
 		});
 	};
 	o.create = function(event){
 		return $http.post('/events', event).success(function(data){
-			console.log(data);
 			o.events.push(data);
 		});
 	};
@@ -94,9 +89,7 @@ app.factory('friends', ['$http', '$q', function($http, $q){
 		});
 	};
 	o.postUserPrefs = function(prefs){
-		console.log(prefs);
 		return $http.post('/userprefs', prefs).success(function(data){
-			console.log(data);
 		});
 	}
 	return o;
@@ -113,7 +106,6 @@ function sortOn(collection, name){
 };
 
 function stringToUTC(timeString){
-	console.log(timeString);
 	var time = Number(timeString.substring(0, 2))*3600000;
 	if (timeString.length > 4 && timeString.substring(5, 7) == "AM"){
 	} 
@@ -122,7 +114,6 @@ function stringToUTC(timeString){
 		time += 12*3600000;
 	}
 	time += Number(timeString.substring(3, 5))*60000;
-	console.log(time);
 	return time;
 };
 
@@ -255,9 +246,7 @@ app.controller('MainCtrl', [
 				}
 				$scope.submissionError = "";
 			var timeStart = stringToUTC($scope.startTime);
-			console.log($scope.startTime);
 			var timeEnd = stringToUTC($scope.endTime);
-			console.log(timeStart);
 			//Find the date
 			var newDate = new Date($scope.eventDate);
 			var eventString = friends.days[newDate.getDay()] + ", ";
@@ -291,7 +280,6 @@ app.controller('MainCtrl', [
 			$scope.showEvent = !$scope.showEvent;
 		};
 		$scope.incrementUpvotes = function(post){
-			console.log(post.comments.length);
 			friends.upvote(post);
 		};
 		$scope.decrementUpvotes = function(post){
