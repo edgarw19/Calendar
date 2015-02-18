@@ -13,7 +13,7 @@ var googleAuth =
 {
         'clientID'      : '375009401841-n8lbs9fqtom68hbh9oo1dprpj7l3gq0f.apps.googleusercontent.com',
         'clientSecret'  : 'lcFBv3AtdTrc_lRyyj4EZ8-I',
-        'callbackURL'   : 'http://localhost:3000/auth/google/callback'
+        'callbackURL'   : 'http://tigerevents.org/google/callback'
     };
 
 var mongoose = require('mongoose');
