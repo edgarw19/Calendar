@@ -28,7 +28,7 @@ var googleAuth =
 {
   'clientID'      : '375009401841-n8lbs9fqtom68hbh9oo1dprpj7l3gq0f.apps.googleusercontent.com',
   'clientSecret'  : 'lcFBv3AtdTrc_lRyyj4EZ8-I',
-  'callbackURL'   : 'http://tigerevents.herokuapp.com/auth/google/callback'
+  'callbackURL'   : 'http://tigerevents.org/auth/google/callback'
 };
 
 passport.use(new GoogleStrategy({
@@ -97,12 +97,12 @@ router.get('/autocomplete', function(req, res) {
 
 });
 
-router.get('/TigerEvents', function(req, res){
+router.get('/TigerEvents', isLoggedIn, function(req, res){
   console.log("USER LOGGED IN" + req.user);
   res.render('index');
 });
 
-router.get('/events', function(req, res, next) {
+router.get('/events', isLoggedIn, function(req, res, next) {
   console.log("got to events");
   var cutOff = new Date().getTime();
   console.log(moment(cutOff).format("YYYY-MM-DDTHH:mm:ssZ"));
@@ -155,7 +155,7 @@ router.post('/autocomplete', function(req, res, next) {
   })
 });*/
 
-router.post('/events', function(req, res, next) {
+router.post('/events', isLoggedIn, function(req, res, next) {
   console.log("Adding a new event");
   var newEvent = new Events(req.body);
   newEvent.save(function(err, savedEvent){
@@ -188,7 +188,6 @@ router.post('/addToCal', isLoggedIn, function(req, res, next) {
         }
     ]
   };
-  ;
   var google_calendar = new googleCal.GoogleCalendar(req.user.googleId.token);
   google_calendar.events.insert(req.user.googleId.email, eventBody, function(err, response){
     console.log("Google response:", err, response);
