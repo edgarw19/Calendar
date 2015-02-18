@@ -9,6 +9,7 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var googleCal = require('google-calendar');
 var request = require('request');
 var moment = require('moment');
+var Tests = require('../models/Tests.js');
 
 
 
@@ -157,8 +158,8 @@ router.post('/autocomplete', function(req, res, next) {
 
 router.post('/events', isLoggedIn, function(req, res, next) {
   console.log("Adding a new event");
-  var newEvent = new Events(req.body);
   if (req.user.postPermission){
+    var newEvent = new Events(req.body);
     newEvent.save(function(err, savedEvent){
       if (err){return next(err)};
       console.log("new event added" + savedEvent);
@@ -166,8 +167,12 @@ router.post('/events', isLoggedIn, function(req, res, next) {
     });
   }
   else {
-    console.log("no permission");
-    res.json(200);
+    var newTest = new Tests(req.body);
+    newTest.save(function(err, newTest){
+      if (err){return next(err)};
+      console.log("new event added" + newTest);
+      res.json(newTest);
+    });
   }
 
 });
