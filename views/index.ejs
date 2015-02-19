@@ -56,7 +56,7 @@
 <div class="col-md-10">
         <div class="card">
             <div class="toolbar">
-                <lx-search-filter model="searchTerm" filter-width="100%" placeholder="Search by name, location, category"></lx-search-filter>
+                <lx-search-filter model="searchTerm" filter-width="100%" placeholder="Name, location, category"></lx-search-filter>
             </div>
         </div>
     </div>
@@ -177,38 +177,7 @@
 <!-- EVENT DIALOG -->
 
 
-<lx-dialog class="dialog dialog--l" id="test" onclose="closingDialog()">
-<div class="dialog__header">
-  <div class="toolbar bgc-light-blue-500">
-    <span class="toolbar__label tc-white fs-title">
-      {{dialog.Title}} | {{dialog.Host}}
-    </span>
 
-  </div>
-</div>
-
-<div class="dialog__content">
-  <lx-tabs links-tc="light" links-bgc="light-blue-500" indicator="yellow-500" no-divider="true" layout="inline">
-  <lx-tab heading="{{dialog.Date}} {{dialog.Time}}">
-  <div class="p">
-    {{dialog.Description}}
-  </div>
-  <div class="p">
-  <h5>Tags</h5>
-  <p ng-repeat="tag in dialog.Tags">{{tag}}
-
-  </p>
-  </div>
-</lx-tab>
-</lx-tabs>
-</div>
-<div class="dialog__actions">
-  <button class="btn btn--m btn--black btn--flat" lx-ripple ng-click="addToCal(dialog.fullEvent)">Add to Cal</button>
-</div>
-<div class="dialog__actions">
-  <button class="btn btn--m btn--black btn--flat" lx-ripple lx-dialog-close>Cancel</button>
-</div>
-</lx-dialog>
 
 <!-- LIST OF EVENTS -->
 <div class="data-table-container, col-md-12" ng-repeat="group in groups">
@@ -249,6 +218,39 @@
   </table>
 </div>
 
+<lx-dialog class="dialog dialog--l" id="test" onclose="closingDialog()">
+<div class="dialog__header" style="margin-top: 50px" >
+  <div class="toolbar bgc-light-blue-500">
+    <span class="toolbar__label tc-white fs-title">
+      {{dialog.Title}} | {{dialog.Host}}
+    </span>
+
+  </div>
+</div>
+
+<div class="dialog__content">
+  <lx-tabs links-tc="light" links-bgc="light-blue-500" indicator="yellow-500" no-divider="true" layout="inline">
+  <lx-tab heading="{{dialog.Date}} {{dialog.Time}}">
+  <div class="p">
+    {{dialog.Description}}
+  </div>
+  <div class="p">
+  <h5>Tags</h5>
+  <p ng-repeat="tag in dialog.Tags">{{tag}}
+
+  </p>
+  </div>
+</lx-tab>
+</lx-tabs>
+</div>
+<div class="dialog__actions">
+  <button class="btn btn--m btn--black btn--flat" lx-ripple ng-click="addToCal(dialog.fullEvent)">Add to Cal</button>
+</div>
+<div class="dialog__actions">
+  <button class="btn btn--m btn--black btn--flat" lx-ripple lx-dialog-close>Cancel</button>
+</div>
+</lx-dialog>
+
 </script>
 
 <script type="text/ng-template" id="/myevents.html">
@@ -283,10 +285,11 @@
 <br>
     </div>
 
+
 <div class="col-md-10">
         <div class="card">
             <div class="toolbar">
-                <lx-search-filter model="searchTerm" filter-width="100%" placeholder="Search by name, location, category"></lx-search-filter>
+                <lx-search-filter model="searchTerm" filter-width="100%" placeholder="Name, location, category"></lx-search-filter>
             </div>
         </div>
     </div>
@@ -335,7 +338,7 @@
 </div>
 <div class="col-md-10">
 <div flex-container="row" flex-gutter="24">
-    <div flex-item ng-repeat="event in events">
+    <div flex-item ng-repeat="event in events | orderBy: 'eventDate' | filter:searchTerm">
         <div class="card" class="myEvents">
 
             <div class="p+">
@@ -355,6 +358,12 @@
         </div>
         </div>
     </div>
+
+
+
+    
+    <div class="col-md-10">
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br></div>
 
     
 

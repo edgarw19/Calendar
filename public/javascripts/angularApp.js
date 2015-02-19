@@ -348,6 +348,8 @@ app.controller('MainCtrl', [
 app.controller('myEventsCtrl', ['$scope', 'friends', 'LxDialogService', function($scope, friends, LxDialogService){
 	$scope.events = friends.events;
 	$scope.dialog = {};
+	var name = friends.userProfile[0].googleId.name.split(" ");
+	$scope.user = name[0];
 	$scope.setDialog = function(event){
 
 			$scope.dialog.Title = event.eventName;
@@ -398,6 +400,9 @@ app.config(['$httpProvider','$stateProvider', '$urlRouterProvider',
 			resolve: {
 				postPromise: ['friends', function(friends){
 					return friends.getMyEvents();
+				}],
+				userPromise: ['friends', function(friends){
+					return friends.getUser();
 				}]
 			}
 		});
