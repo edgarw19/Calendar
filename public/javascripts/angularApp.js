@@ -79,12 +79,25 @@ app.factory('friends', ['$http', '$q', function($http, $q){
 		});
 	};
 
+	o.getMyEvents = function(){
+		return $http.get('/myevents').success(function(data){
+			console.log(data);
+			angular.copy(data, o.events);//makes UI update correctly
+		});
+	};
+
 	o.getUser = function(){
 		return $http.get('/user').success(function(data){
 			console.log(data);
 			o.userProfile.push(data);//makes UI update correctly
 		});
 	};
+
+	o.favoriteEvent = function(event){
+		return $http.post('/favoriteEvent', event).success(function(data){
+			console.log(data);//makes UI update correctly
+		});
+	}
 
 	o.test = function(suggestion){
 		return $http.post('/autocomplete', suggestion).success(function(data){
@@ -145,10 +158,12 @@ app.controller('MainCtrl', [
 		$scope.isShowPreference = false;
 		var category = {};
 		var name = friends.userProfile[0].googleId.name.split(" ");
+		console.log(name);
 		$scope.category = "Choose Category";
 		$scope.tags = [];
 		$scope.prefGroups = [];
 		$scope.user = name[0];
+		console.log($scope.user);
 		$scope.loadItems = function(query){
 			return friends.load(query);
 		};
@@ -249,6 +264,11 @@ app.controller('MainCtrl', [
 		{
 
 		};
+		$scope.favoriteEvent = function(event){
+			console.log(event);
+			friends.favoriteEvent(event);
+			LxNotificationService.info('Event added to my events!');
+		}
 		$scope.clearEventForm = function(){
 			//$scope.eventName = "";
 			//$scope.eventHost = "";
@@ -323,27 +343,37 @@ app.controller('MainCtrl', [
 // 		}
 // 	}]);
 
-// app.controller('friendsCtrl', ['$scope', 'post', 'friends',
-// 	function($scope, post, friends){
-// 		$scope.post = post;
-// 		$scope.addComment = function(){
-// 			if($scope.body === ''){return;}
-// 			friends.add
-// 			$scope.post.comments.push({
-// 				body: $scope.body,
-// 				author: 'user',
-// 				upvotes: 0
-// 			});
-// 			$scope.body = '';
-// 		}
-// 	
+	
 
-app.controller('landCtrl', ['$scope', 'friends', function($scope, friends){
+app.controller('myEventsCtrl', ['$scope', 'friends', 'LxDialogService', function($scope, friends, LxDialogService){
+	$scope.events = friends.events;
+	$scope.dialog = {};
+	$scope.setDialog = function(event){
+
+			$scope.dialog.Title = event.eventName;
+			$scope.dialog.Date = event.eventDisplay;
+			$scope.dialog.Description = event.eventDescription;
+			$scope.dialog.Host = event.eventHost;
+			$scope.dialog.fullEvent = event;
+			if(event.tags){
+				$scope.dialog.Tags = event.tags;
+			}
+			if (event.startTimeString && event.endTimeString){
+			$scope.dialog.Time = event.startTimeString.substring(0, 5) + "-" + event.endTimeString;
+			}
+		};
+		$scope.opendDialog = function(event)
+		{
+			$scope.setDialog(event);
+
+			LxDialogService.open('test');
+		};
 	$scope.test = function(){
 		console.log("HERE");
 		friends.test();
 	};
 }]);
+
 app.config(['$httpProvider','$stateProvider', '$urlRouterProvider', 
 	function($httpProvider,$stateProvider, $urlRouterProvider){
 
@@ -361,10 +391,15 @@ app.config(['$httpProvider','$stateProvider', '$urlRouterProvider',
 				}]
 			}
 		});
-		$stateProvider.state('landing', {
-			url: '/landing',
-			templateUrl: '/landing.html',
-			controller: 'MainCtrl',
+		$stateProvider.state('myevents', {
+			url: '/myevents',
+			templateUrl: '/myevents.html',
+			controller: 'myEventsCtrl',
+			resolve: {
+				postPromise: ['friends', function(friends){
+					return friends.getMyEvents();
+				}]
+			}
 		});
 		$urlRouterProvider.otherwise('home');//otherwise go here
 	}]);

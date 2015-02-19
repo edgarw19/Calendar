@@ -7,14 +7,14 @@
     "Framework"
   ],
   "homepage": "ui.lumapps.com",
-  "version": "0.2.51",
+  "version": "0.3.10",
   "authors": [
     "LumApps"
   ],
   "license": "MIT",
   "main": [
-    "dist/css/lumx.css",
-    "dist/js/lumx.js"
+    "dist/lumx.css",
+    "dist/lumx.js"
   ],
   "repository": {
     "type": "git",
@@ -40,24 +40,28 @@
     "release.py"
   ],
   "dependencies": {
-    "angular": "~1.3.10",
+    "angular": "~1.3.11",
     "jquery": "~2.1.3",
     "velocity": "~1.2.1",
     "moment": "~2.9.0",
-    "neat": "~1.7.1"
+    "bourbon": "~4.1.1",
+    "mdi": "~0.8.9-alpha"
   },
   "devDependencies": {
-    "angular-route": "~1.3.10",
+    "angular-route": "~1.3.11",
     "highlightjs": "~8.4.0"
   },
-  "_release": "0.2.51",
+  "resolutions": {
+    "angular": "1.3.12"
+  },
+  "_release": "0.3.10",
   "_resolution": {
     "type": "version",
-    "tag": "v0.2.51",
-    "commit": "ba084f061cc2f75f9ca03bb9a54a15ac23560444"
+    "tag": "v0.3.10",
+    "commit": "94730e8340637d274722fbe9048ba00d71bd37f2"
   },
   "_source": "git://github.com/lumapps/lumX.git",
-  "_target": "~0.2.51",
+  "_target": "~0.3.10",
   "_originalSource": "lumx",
   "_direct": true
 }

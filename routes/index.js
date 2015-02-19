@@ -9,7 +9,6 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var googleCal = require('google-calendar');
 var request = require('request');
 var moment = require('moment');
-var Tests = require('../models/Tests.js');
 
 
 
@@ -27,11 +26,10 @@ passport.deserializeUser(function(id, done){
 
 var googleAuth =
 {
-  'clientID'      : '375009401841-n8lbs9fqtom68hbh9oo1dprpj7l3gq0f.apps.googleusercontent.com',
-  'clientSecret'  : 'lcFBv3AtdTrc_lRyyj4EZ8-I',
-  'callbackURL'   : 'http://tigerevents.org/auth/google/callback'
-};
-
+        'clientID'      : '1032678438442-rhvgkn5l7en4mmnv2t94jiamnndo4reb.apps.googleusercontent.com',
+        'clientSecret'  : 'J9QEdWZG2YMVuJkWw1BotaMu',
+        'callbackURL'   : 'http://localhost:3000/auth/google/callback'
+    };
 passport.use(new GoogleStrategy({
   clientID: googleAuth.clientID,
   clientSecret: googleAuth.clientSecret,
@@ -98,10 +96,91 @@ router.get('/autocomplete', function(req, res) {
 
 });
 
-router.get('/TigerEvents', function(req, res){
+router.get('/TigerEvents', isLoggedIn, function(req, res){
   console.log("USER LOGGED IN" + req.user);
   res.render('index');
 });
+
+router.get('/user', isLoggedIn, function(req, res){
+  console.log(req.user);
+  res.send(req.user);
+});
+
+router.get('/myevents', isLoggedIn, function(req, res, next) {
+  var cutOff = new Date().getTime();
+  var query = Events.find({favoritedBy: req.user._id});
+  query.find({eventUTC: {$gt: cutOff}});
+  /*if (req.user.eventPreferences.length > 0){
+    var userPrefs = req.user.eventPreferences;
+    console.log("grabbinb preferences!");
+    console.log(userPrefs);
+    for (var i = 0; i< userPrefs.length; i++){
+      if (userPrefs[i].isPref){
+        preferences.push(userPrefs[i].text);
+      }
+    }
+    query.find({tags: {$in: preferences}});
+  }*/
+  query.sort({eventStartUTC: 'asc'});
+  query.exec(function(err, events){
+    console.log("Grabbed events and returning");
+    res.json(events);
+  });
+});
+
+router.post('/favoriteEvent', isLoggedIn, function(req, res, next){
+  var query = Events.findOne({_id: req.body._id});
+  console.log("here");
+  query.exec(function(err, eventf){
+    var tags = eventf.favoritedBy;
+    var isMarked = false;
+    for (var i = 0; i < tags.length; i++){
+      if (tags[i].equals(req.user._id)){
+        isMarked = true;
+        break;
+      }
+    }
+    if (isMarked){
+      res.json(eventf);
+    }
+    else {
+      eventf.favoritedBy.push(req.user._id);
+      eventf.popularity = eventf.popularity+1;
+      eventf.save(function(err, savedEvent){
+      if (err){console.log(err); return next(err)};
+      console.log(savedEvent);
+      res.json(savedEvent);
+    });
+    }
+  });
+})
+
+router.post('/favoriteEvent', isLoggedIn, function(req, res, next){
+  var query = Events.findOne({_id: req.body._id});
+  console.log("here");
+  query.exec(function(err, eventf){
+    var tags = eventf.favoritedBy;
+    var isMarked = false;
+    for (var i = 0; i < tags.length; i++){
+      if (tags[i].equals(req.user._id)){
+        isMarked = true;
+        break;
+      }
+    }
+    if (isMarked){
+      res.json(eventf);
+    }
+    else {
+      eventf.favoritedBy.push(req.user._id);
+      eventf.popularity = eventf.popularity+1;
+      eventf.save(function(err, savedEvent){
+      if (err){console.log(err); return next(err)};
+      console.log(savedEvent);
+      res.json(savedEvent);
+    });
+    }
+  });
+})
 
 router.get('/events', isLoggedIn, function(req, res, next) {
   console.log("got to events");
@@ -129,11 +208,34 @@ router.get('/events', isLoggedIn, function(req, res, next) {
   });
 });
 
+
+router.get('/myevents', isLoggedIn, function(req, res, next) {
+  var cutOff = new Date().getTime();
+  var query = Events.find({favoritedBy: req.user._id});
+  query.find({eventUTC: {$gt: cutOff}});
+  /*if (req.user.eventPreferences.length > 0){
+    var userPrefs = req.user.eventPreferences;
+    console.log("grabbinb preferences!");
+    console.log(userPrefs);
+    for (var i = 0; i< userPrefs.length; i++){
+      if (userPrefs[i].isPref){
+        preferences.push(userPrefs[i].text);
+      }
+    }
+    query.find({tags: {$in: preferences}});
+  }*/
+  query.sort({eventStartUTC: 'asc'});
+  query.exec(function(err, events){
+    console.log("Grabbed events and returning");
+    res.json(events);
+  });
+});
+
+
 router.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
 });
-
 
 router.post('/autocomplete', function(req, res, next) {
   var newSuggestion = new AutoComplete(req.body);
@@ -164,30 +266,13 @@ router.post('/autocomplete', function(req, res, next) {
 
 router.post('/events', isLoggedIn, function(req, res, next) {
   console.log("Adding a new event");
-  if (req.user.postPermission){
-    var newEvent = new Events(req.body);
-    newEvent.save(function(err, savedEvent){
-      if (err){return next(err)};
-      console.log("new event added" + savedEvent);
-      res.json(savedEvent);
-    });
-  }
-  else {
-    var newTest = new Tests(req.body);
-    newTest.save(function(err, newTest){
-      if (err){return next(err)};
-      console.log("new event added" + newTest);
-      res.json(newTest);
-    });
-  }
-
+  var newEvent = new Events(req.body);
+  newEvent.save(function(err, savedEvent){
+    if (err){return next(err)};
+    console.log("new event added" + savedEvent);
+    res.json(savedEvent);
+  });
 });
-
-router.get('/user', isLoggedIn, function(req, res){
-  console.log(req.user);
-  res.send(req.user);
-});
-
 
 router.post('/addToCal', isLoggedIn, function(req, res, next) {
     console.log("Adding event to calendar");

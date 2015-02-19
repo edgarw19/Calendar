@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <title>TigerEvents</title>
-  <link rel="stylesheet" href="bower_components/lumx/dist/css/lumx.css">
+  <link rel="stylesheet" href="bower_components/lumx/dist/lumx.css">
   <link href="./stylesheets/bootstrap.css" rel="stylesheet">
   <link href="./stylesheets/jquery-clockpicker.min.css" rel="stylesheet">
   <link href="./stylesheets/ng-tags-input.css" rel="stylesheet">
@@ -21,8 +21,8 @@
 
   <script type="text/ng-template" id="/home.html">
 
-<!-- Navbar -->
-<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <!-- Navbar -->
+<div class="navbar transparent navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle pull-right" data-toggle="collapse" data-target=".navbar-ex1-collapse">
@@ -37,7 +37,7 @@
         <div class="collapse navbar-collapse navbar-ex1-collapse" role="navigation">
             <ul class="nav navbar-nav navbar-right">
                 <li id="genEventsNav"><a>Welcome, {{user}}!</a></li>
-                <li id="myEventsNav"><a href="/eventItems">My Events</a></li>
+                <li id="myEventsNav"><a href="#/myevents">My Events</a></li>
                 <li id="logout"><a href="/logout">Logout</a></li>
             </ul>
         </div>
@@ -222,7 +222,7 @@
         <th><b>Event Name</b></th>
         <th><b>Location</b></th>
         <th><b>Category</b></th>
-        <th><b>More</b></th>
+        <th><b>Save Event</b></th>
       </tr>
     </thead>
     <tbody>
@@ -239,11 +239,8 @@
         <td>
           <span><button class="btn btn--s btn--{{event.categoryColor}} btn--raised">{{event.category}}</button></span>
         </td>
-        <td>
-          <button class="btn btn--l btn--black btn--icon" lx-ripple>
-            <i class="mdi mdi--expand-more"></i>
-          </button>
-
+        <td ng-click="favoriteEvent(event); $event.stopPropagation();">
+          <span class="glyphicon glyphicon-ok-circle" style="font-size: 2em" aria-hidden="true">
         </td>
       </tr>
 
@@ -252,6 +249,124 @@
   </table>
 </div>
 
+</script>
+
+<script type="text/ng-template" id="/myevents.html">
+    <!-- Navbar -->
+<div class="navbar transparent navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle pull-right" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/TigerEvents#/home" class="navbar-brand"><strong>TigerEvents</strong></a>
+        </div>
+
+        <div class="collapse navbar-collapse navbar-ex1-collapse" role="navigation">
+            <ul class="nav navbar-nav navbar-right">
+                <li id="genEventsNav"><a>Welcome, {{user}}!</a></li>
+                <li id="myEventsNav"><a href="#/myevents">My Events</a></li>
+                <li id="logout"><a href="/logout">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+  <div class="col-md-4" style="margin-top:60px">
+  <h1>My Events</h1>
+  <h4 style="color: gray"></h4>
+</div>
+
+<div class="col-md-10">
+<br>
+    </div>
+
+<div class="col-md-10">
+        <div class="card">
+            <div class="toolbar">
+                <lx-search-filter model="searchTerm" filter-width="100%" placeholder="Search by name, location, category"></lx-search-filter>
+            </div>
+        </div>
+    </div>
+
+      
+
+
+
+<!-- EVENT DIALOG -->
+
+
+<lx-dialog class="dialog dialog--l" id="test" onclose="closingDialog()">
+<div class="dialog__header">
+  <div class="toolbar bgc-light-blue-500">
+    <span class="toolbar__label tc-white fs-title">
+      {{dialog.Title}} | {{dialog.Host}}
+    </span>
+
+  </div>
+</div>
+
+<div class="dialog__content">
+  <lx-tabs links-tc="light" links-bgc="light-blue-500" indicator="yellow-500" no-divider="true" layout="inline">
+  <lx-tab heading="{{dialog.Date}} {{dialog.Time}}">
+  <div class="p">
+    {{dialog.Description}}
+  </div>
+  <div class="p">
+  <h5>Tags</h5>
+  <p ng-repeat="tag in dialog.Tags">{{tag}}
+
+  </p>
+  </div>
+</lx-tab>
+</lx-tabs>
+</div>
+<div class="dialog__actions">
+  <button class="btn btn--m btn--black btn--flat" lx-ripple ng-click="addToCal(dialog.fullEvent)">Add to Cal</button>
+</div>
+<div class="dialog__actions">
+  <button class="btn btn--m btn--black btn--flat" lx-ripple lx-dialog-close>Cancel</button>
+</div>
+</lx-dialog>
+<div class="col-md-10">
+<br><br><br><br>
+</div>
+<div class="col-md-10">
+<div flex-container="row" flex-gutter="24">
+    <div flex-item ng-repeat="event in events">
+        <div class="card" class="myEvents">
+
+            <div class="p+">
+              <h3> {{event.eventName}} <span class="fs-subhead tc-black-2 display-block">{{event.eventDisplay}} @ {{event.eventHost}} | {{event.startTimeString}}</span></h2>
+                
+
+                <div class="paragraph fs-body-1">
+                    <p>
+                        {{event.eventDescription}}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card__actions">
+                <button class="btn btn--m btn--black btn--flat" lx-ripple ng-click="opendDialog(event)">More</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    
+
+    
+</div>
+
+
+
+<!-- LIST OF EVENTS -->
+<div class="data-table-container, col-md-12" >
+{{event.eventName}}
+</div>
 </script>
 
 
@@ -265,7 +380,7 @@
 <script src="./bower_components/moment/min/moment-with-locales.min.js"></script>
 <script src="./bower_components/angular/angular.js"></script>
 
-<script src="./bower_components/lumx/dist/js/lumx.js"></script>
+<script src="./bower_components/lumx/dist/lumx.js"></script>
 <script src="./javascripts/clockpicker.js"></script>
 <script src="./javascripts/ng-tags-input.js"></script>
 

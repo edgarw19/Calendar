@@ -14,7 +14,9 @@ var EventSchema = new mongoose.Schema({
 	endTimeString: String,
 	tags: [String],
 	eventStartUTC: Number,
-	eventEndUTC: Number
+	eventEndUTC: Number,
+	popularity: {type: Number, default: 0},
+	favoritedBy: []
 
 
 });
