@@ -318,8 +318,8 @@ app.controller('MainCtrl', [
 					$scope.submissionError = "Missing a required field";
 					return;
 				}
-			if(!$scope.eventName.length > 150 || !$scope.eventHost.length > 150 || ($scope.category === "Choose Category")  
-				|| !$scope.startTime.length > 150 || !$scope.endTime.length > 150  || !$scope.eventDate.length > 150)
+			if($scope.eventName.length > 150 || $scope.eventHost.length > 150 || ($scope.category === "Choose Category")  
+				|| $scope.startTime.length > 150 || $scope.endTime.length > 150  || $scope.eventDate.length > 150)
 				{
 					$scope.submissionError = "Field is too long";
 					return;
