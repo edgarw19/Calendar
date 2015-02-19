@@ -345,7 +345,7 @@ app.controller('MainCtrl', [
 
 	
 
-app.controller('myEventsCtrl', ['$scope', 'friends', 'LxDialogService', function($scope, friends, LxDialogService){
+app.controller('myEventsCtrl', ['$scope', 'friends', 'LxDialogService', 'LxNotificationService', function($scope, friends, LxDialogService, LxNotificationService){
 	$scope.events = friends.events;
 	$scope.dialog = {};
 	var name = friends.userProfile[0].googleId.name.split(" ");
