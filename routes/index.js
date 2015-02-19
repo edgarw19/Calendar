@@ -3,6 +3,7 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var Events = require('../models/Events.js');
+var Tests = require('../models/Tests.js');
 var AutoComplete = require('../models/autoComplete.js');
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
@@ -164,32 +165,7 @@ router.post('/favoriteEvent', isLoggedIn, function(req, res, next){
   });
 })
 
-router.post('/favoriteEvent', isLoggedIn, function(req, res, next){
-  var query = Events.findOne({_id: req.body._id});
-  console.log("here");
-  query.exec(function(err, eventf){
-    var tags = eventf.favoritedBy;
-    var isMarked = false;
-    for (var i = 0; i < tags.length; i++){
-      if (tags[i].equals(req.user._id)){
-        isMarked = true;
-        break;
-      }
-    }
-    if (isMarked){
-      res.json(eventf);
-    }
-    else {
-      eventf.favoritedBy.push(req.user._id);
-      eventf.popularity = eventf.popularity+1;
-      eventf.save(function(err, savedEvent){
-      if (err){console.log(err); return next(err)};
-      console.log(savedEvent);
-      res.json(savedEvent);
-    });
-    }
-  });
-})
+
 
 router.get('/events', isLoggedIn, function(req, res, next) {
   console.log("got to events");
@@ -275,12 +251,23 @@ router.post('/autocomplete', function(req, res, next) {
 
 router.post('/events', isLoggedIn, function(req, res, next) {
   console.log("Adding a new event");
-  var newEvent = new Events(req.body);
-  newEvent.save(function(err, savedEvent){
-    if (err){return next(err)};
-    console.log("new event added" + savedEvent);
-    res.json(savedEvent);
-  });
+  if (req.user.postPermission){
+    var newEvent = new Events(req.body);
+    newEvent.save(function(err, savedEvent){
+      if (err){return next(err)};
+      console.log("new event added" + savedEvent);
+      res.json(savedEvent);
+    });
+  }
+  else {
+    var newEvent = new Tests(req.body);
+    newEvent.save(function(err, savedEvent){
+      if (err){return next(err)};
+      console.log("new test added" + savedEvent);
+      res.json(savedEvent);
+    });
+  }
+
 });
 
 router.post('/addToCal', isLoggedIn, function(req, res, next) {

@@ -310,6 +310,12 @@ app.controller('MainCtrl', [
 			//$scope.eventDescription = "";
 			$scope.category = "Choose Category";
 		};
+		$scope.fullClearEventForm = function(){
+			$scope.eventName = "";
+			$scope.eventHost = "";
+			$scope.eventDescription = "";
+			$scope.category = "Choose Category";
+		};
 		$scope.addNewEvent = function(){
 			//Find the time
 			if(!$scope.eventName || !$scope.eventHost || ($scope.category === "Choose Category")  
@@ -334,7 +340,7 @@ app.controller('MainCtrl', [
 			var timeStart = stringToUTC($scope.startTime);
 			console.log($scope.startTime);
 			var timeEnd = stringToUTC($scope.endTime);
-			console.log(timeStart);
+			console.log(timeStart+ "stopped here");
 			//Find the date
 			var newDate = new Date($scope.eventDate);
 			var eventString = friends.days[newDate.getDay()] + ", ";
