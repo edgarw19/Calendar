@@ -134,19 +134,24 @@ function sortOn(collection, name){
 		});
 };
 
-function stringToUTC(timeString){
-	console.log(timeString);
+function stringToUTC(timeString, isEnd){
+	// console.log("STRING TO UTC");
+	// console.log(timeString);
 	var time = Number(timeString.substring(0, 2))*3600000;
-	if (timeString.length > 4 && timeString.substring(5, 7) == "AM"){
+	if (timeString.length > 4 && timeString.substring(5, 7) == "AM" && isEnd){
+		time += 86400000;
+	} 
+	else if (timeString.length > 4 && timeString.substring(5, 7) == "AM"){
 	} 
 	else if (timeString.substring(0,2) === "12"){
 	} else {
 		time += 12*3600000;
 	}
 	time += Number(timeString.substring(3, 5))*60000;
-	console.log(time);
+	//console.log(time);
 	return time;
 };
+
 
 
 app.controller('MainCtrl', [
@@ -158,12 +163,12 @@ app.controller('MainCtrl', [
 		$scope.isShowPreference = false;
 		var category = {};
 		var name = friends.userProfile[0].googleId.name.split(" ");
-		console.log(name);
+		//console.log(name);
 		$scope.category = "Choose Category";
 		$scope.tags = [];
 		$scope.prefGroups = [];
 		$scope.user = name[0];
-		console.log($scope.user);
+		//console.log($scope.user);
 		$scope.loadItems = function(query){
 			return friends.load(query);
 		};
@@ -300,7 +305,7 @@ app.controller('MainCtrl', [
 
 		};
 		$scope.favoriteEvent = function(event){
-			console.log(event);
+			//console.log(event);
 			friends.favoriteEvent(event);
 			LxNotificationService.info('Event added to my events!');
 		}
@@ -337,12 +342,16 @@ app.controller('MainCtrl', [
 					}
 				}
 				$scope.submissionError = "";
-			var timeStart = stringToUTC($scope.startTime);
-			console.log($scope.startTime);
-			var timeEnd = stringToUTC($scope.endTime);
-			console.log(timeStart+ "stopped here");
+			var timeStart = stringToUTC($scope.startTime, false);
+			//console.log($scope.startTime);
+			var timeEnd = stringToUTC($scope.endTime, true);
+			//console.log(timeStart+ "stopped here");
+
 			//Find the date
+			//console.log($scope.eventDate + "is the event date");
 			var newDate = new Date($scope.eventDate);
+			var newDateTime = newDate.getTime()-newDate.getHours()*3600000-newDate.getMinutes()*60000;
+			//console.log("DATE MILLIS IS" + newDate.getTime());
 			var eventString = friends.days[newDate.getDay()] + ", ";
 			eventString += friends.months[newDate.getMonth()] + " " + newDate.getDate();
 			var tagArray = [];
@@ -356,23 +365,23 @@ app.controller('MainCtrl', [
 				eventName: $scope.eventName,
 				eventHost: $scope.eventHost,
 				eventDescription: $scope.eventDescription,
-				eventUTC: (newDate.getTime()+timeStart),
+				eventUTC: (newDate.getTime()),
 				eventDisplay: eventString,
 				category: category.name,
 				categoryColor: category.color,
 				startTimeString: $scope.startTime,
 				endTimeString: $scope.endTime,
 				tags: tagArray,
-				eventStartUTC: (newDate.getTime()+timeStart),
-				eventEndUTC: (newDate.getTime()+timeEnd)
+				eventStartUTC: (newDateTime+timeStart),
+				eventEndUTC: (newDateTime+timeEnd)
 			});
 			$scope.clearEventForm();
 			$scope.showEventForm();
 			LxNotificationService.info('Event Submitted for Review!');
 		};
 		$scope.showEventForm = function(){
-			console.log("YEAAAA");
-			console.log("hello" + $scope.searchTerm);
+			//console.log("YEAAAA");
+			//console.log("hello" + $scope.searchTerm);
 			$scope.showEvent = !$scope.showEvent;
 		};
 		$scope.incrementUpvotes = function(post){

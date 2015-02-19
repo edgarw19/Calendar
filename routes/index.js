@@ -56,6 +56,7 @@ passport.use(new GoogleStrategy({
        appUser.googleId.token = token;
        appUser.googleId.refreshToken = refreshToken;
        appUser.lastTime = new Date();
+       appUser.visits = appUser.visits + 1;
        appUser.save(function(err, savedUser){
         if (err) {console.log("FIRST ERROR");throw err;}
         console.log("The updated user is " + savedUser.googleId.token);
@@ -77,6 +78,7 @@ passport.use(new GoogleStrategy({
         newUser.googleId.token = token;
         newUser.googleId.name  = profile.displayName;
         newUser.lastTime = new Date();
+        newUser.visits = 1;
         newUser.googleId.refreshToken = refreshToken;
         newUser.googleId.email = profile.emails[0].value;
       //newUser.googleCal.push(google_calendar);
@@ -189,6 +191,7 @@ router.get('/events', isLoggedIn, function(req, res, next) {
   query.sort({eventStartUTC: 'asc'});
   query.exec(function(err, events){
     console.log("Grabbed events and returning");
+
     res.json(events);
   });
 });
@@ -251,23 +254,37 @@ router.post('/autocomplete', function(req, res, next) {
 
 router.post('/events', isLoggedIn, function(req, res, next) {
   console.log("Adding a new event");
-  if (req.user.postPermission){
-    var newEvent = new Events(req.body);
-    newEvent.save(function(err, savedEvent){
-      if (err){return next(err)};
-      console.log("new event added" + savedEvent);
-      res.json(savedEvent);
-    });
-  }
-  else {
-    var newEvent = new Tests(req.body);
-    newEvent.save(function(err, savedEvent){
-      if (err){return next(err)};
-      console.log("new test added" + savedEvent);
-      res.json(savedEvent);
-    });
-  }
+  User.findById(req.user._id, function(err, appUser){
+    if (appUser.numOfPosts > 50){
+      res.json(204);
+    }  
+    if (appUser.postPermission){
+      var newEvent = new Events(req.body);
+      newEvent.save(function(err, savedEvent){
+        if (err){return next(err)};
+        console.log("new event added" + savedEvent);
+        appUser.numOfPosts = appUser.numOfPosts + 1;
+        appUser.save(function(err, savedUser){
+          if (err) {console.log("NO SAVE, YES PERMISS");return next(err);}
+          res.json(savedEvent);
+        });
+      });
+    }
+    else {
+      var newEvent = new Tests(req.body);
+      newEvent.save(function(err, savedEvent){
+        if (err){return next(err)};
+        console.log("new event added" + savedEvent);
+        appUser.numOfPosts = appUser.numOfPosts + 1;
+        appUser.save(function(err, savedUser){
+          if (err) {console.log("NO SAVE, NO PERMISS");return next(err);}
+          res.json(savedEvent);
+        });
+      });;
+    }
 
+
+  });
 });
 
 router.post('/addToCal', isLoggedIn, function(req, res, next) {

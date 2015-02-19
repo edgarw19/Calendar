@@ -11,7 +11,8 @@ var UserSchema = new mongoose.Schema({
 	eventPreferences: [],
 	googleCal: [],
 	postPermission: {type: Boolean, default: false},
-	visits: {type: Number, default: 0}
+	visits: {type: Number, default: 0},
+	numOfPosts: {type: Number, default: 0}
 });
 
 module.exports = mongoose.model('User', UserSchema);	
