@@ -7,6 +7,7 @@ var app = angular.module('flapperNews', ['ui.router', 'lumx', 'clock', 'ngTagsIn
 app.factory('friends', ['$http', '$q', function($http, $q){
 	var o = {
 		events: [],
+		userProfile: [],
 		months: ["Jan", "Feb", "March", "April", "May", "June",
 		"July", "Aug", "Sept", "Oct", "Nov", "Dec"],
 		days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -55,6 +56,7 @@ app.factory('friends', ['$http', '$q', function($http, $q){
   o.load = function(query){
   	var deferred = $q.defer();
   	var autoTags = [];
+  	console.log(query);
   	var re = new RegExp(query, "i");
   	for (var i = 0; i < tags.length; i++){
   		if (re.test(tags[i].text)){
@@ -62,9 +64,11 @@ app.factory('friends', ['$http', '$q', function($http, $q){
   		}
   	}
   	if (autoTags.length > 0){
+  		console.log("YES");
   		deferred.resolve(autoTags);
   	}
   	else {
+  		console.log("NO");
   	deferred.resolve(tags);
   	}
   	return deferred.promise;
@@ -74,12 +78,22 @@ app.factory('friends', ['$http', '$q', function($http, $q){
 			angular.copy(data, o.events);//makes UI update correctly
 		});
 	};
+
+	o.getUser = function(){
+		return $http.get('/user').success(function(data){
+			console.log(data);
+			o.userProfile.push(data);//makes UI update correctly
+		});
+	};
+
 	o.test = function(suggestion){
 		return $http.post('/autocomplete', suggestion).success(function(data){
+			console.log(data);
 		});
 	};
 	o.create = function(event){
 		return $http.post('/events', event).success(function(data){
+			console.log(data);
 			o.events.push(data);
 		});
 	};
@@ -89,7 +103,9 @@ app.factory('friends', ['$http', '$q', function($http, $q){
 		});
 	};
 	o.postUserPrefs = function(prefs){
+		console.log(prefs);
 		return $http.post('/userprefs', prefs).success(function(data){
+			console.log(data);
 		});
 	}
 	return o;
@@ -106,6 +122,7 @@ function sortOn(collection, name){
 };
 
 function stringToUTC(timeString){
+	console.log(timeString);
 	var time = Number(timeString.substring(0, 2))*3600000;
 	if (timeString.length > 4 && timeString.substring(5, 7) == "AM"){
 	} 
@@ -114,6 +131,7 @@ function stringToUTC(timeString){
 		time += 12*3600000;
 	}
 	time += Number(timeString.substring(3, 5))*60000;
+	console.log(time);
 	return time;
 };
 
@@ -124,12 +142,13 @@ app.controller('MainCtrl', [
 		$scope.events = friends.events;
 		$scope.showEvent = false;
 		$scope.dialog = {};
-		$scope.extraTags= [];
 		$scope.isShowPreference = false;
 		var category = {};
+		var name = friends.userProfile[0].googleId.name.split(" ");
 		$scope.category = "Choose Category";
 		$scope.tags = [];
 		$scope.prefGroups = [];
+		$scope.user = name[0];
 		$scope.loadItems = function(query){
 			return friends.load(query);
 		};
@@ -246,7 +265,9 @@ app.controller('MainCtrl', [
 				}
 				$scope.submissionError = "";
 			var timeStart = stringToUTC($scope.startTime);
+			console.log($scope.startTime);
 			var timeEnd = stringToUTC($scope.endTime);
+			console.log(timeStart);
 			//Find the date
 			var newDate = new Date($scope.eventDate);
 			var eventString = friends.days[newDate.getDay()] + ", ";
@@ -280,12 +301,42 @@ app.controller('MainCtrl', [
 			$scope.showEvent = !$scope.showEvent;
 		};
 		$scope.incrementUpvotes = function(post){
+			console.log(post.comments.length);
 			friends.upvote(post);
 		};
 		$scope.decrementUpvotes = function(post){
 			friends.downvote(post);
 		};
 	}]);
+
+// app.controller('friendsCtrl', ['$scope', '$stateParams', 'friends',
+// 	function($scope, $stateParams, friends){
+// 		$scope.post = friends.friends[$stateParams.id];
+// 		$scope.addComment = function(){
+// 			if($scope.body === ''){return;}
+// 			$scope.post.comments.push({
+// 				body: $scope.body,
+// 				author: 'user',
+// 				upvotes: 0
+// 			});
+// 			$scope.body = '';
+// 		}
+// 	}]);
+
+// app.controller('friendsCtrl', ['$scope', 'post', 'friends',
+// 	function($scope, post, friends){
+// 		$scope.post = post;
+// 		$scope.addComment = function(){
+// 			if($scope.body === ''){return;}
+// 			friends.add
+// 			$scope.post.comments.push({
+// 				body: $scope.body,
+// 				author: 'user',
+// 				upvotes: 0
+// 			});
+// 			$scope.body = '';
+// 		}
+// 	
 
 app.controller('landCtrl', ['$scope', 'friends', function($scope, friends){
 	$scope.test = function(){
@@ -304,6 +355,9 @@ app.config(['$httpProvider','$stateProvider', '$urlRouterProvider',
 			resolve: {
 				postPromise: ['friends', function(friends){
 					return friends.getAll();
+				}],
+				userPromise: ['friends', function(friends){
+					return friends.getUser();
 				}]
 			}
 		});

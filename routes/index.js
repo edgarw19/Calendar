@@ -183,6 +183,12 @@ router.post('/events', isLoggedIn, function(req, res, next) {
 
 });
 
+router.get('/user', isLoggedIn, function(req, res){
+  console.log(req.user);
+  res.send(req.user);
+});
+
+
 router.post('/addToCal', isLoggedIn, function(req, res, next) {
     console.log("Adding event to calendar");
     var newEvent = new Events(req.body);

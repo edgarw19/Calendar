@@ -1,3 +1,4 @@
+
 html { 
 <!-- background: url(http://upload.wikimedia.org/wikipedia/commons/a/a7/Alexander_Hall,_Princeton_University_in_winter_02.JPG) no-repeat center center fixed;  --> 
   -webkit-background-size: cover;
@@ -43,3 +44,22 @@ h2 span { font-size:22px; color:gray;}
 a {
       text-decoration:none;
    }
+
+.navbar.transparent.navbar-inverse .navbar-inner {
+   background: rgba(0,0,0,0.8);
+}
+.navbar-inner{
+    background: rgba(0,0,0,0.8) !important;
+    }
+.navbar-inner container{
+    background: rgba(0,0,0,0.8) !important;
+    }
+.navbar{
+    background: rgba(0,0,0,0.8) !important;
+    }
+#nav-main{
+    background: rgba(0,0,0,0.8) !important;
+    }
+#banner{
+    background: rgba(0,0,0,0.8) !important;
+    }​
