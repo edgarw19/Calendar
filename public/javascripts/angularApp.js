@@ -350,6 +350,10 @@ app.controller('myEventsCtrl', ['$scope', 'friends', 'LxDialogService', function
 	$scope.dialog = {};
 	var name = friends.userProfile[0].googleId.name.split(" ");
 	$scope.user = name[0];
+	$scope.addToCal = function(event){
+			friends.addToCal(event);
+			LxNotificationService.notify('Added to your GCal!');
+		};
 	$scope.setDialog = function(event){
 
 			$scope.dialog.Title = event.eventName;
