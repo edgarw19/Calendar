@@ -167,6 +167,41 @@ app.controller('MainCtrl', [
 		$scope.loadItems = function(query){
 			return friends.load(query);
 		};
+		$scope.search = function (item){
+			
+			if (item.eventName){
+				var eventName = item.eventName.toLowerCase();
+			}
+			else {
+				eventName = "XXXXXXXXX";
+			}
+			if (item.eventHost){
+				var eventHost = item.eventHost.toLowerCase();
+			}
+			else {
+				eventName = "XXXXXXXXX";
+			}
+			if (item.category){
+				var eventCategory = item.category.toLowerCase();
+			}
+			else {
+				eventCategory = "XXXXXXXXX";
+			}
+			if ($scope.searchTerm){
+				var searchTerm = $scope.searchTerm.toLowerCase();
+			}
+			else {
+				searchTerm = '';
+			}
+			
+			 if (eventName.indexOf(searchTerm || '')!=-1 || eventCategory.indexOf(searchTerm || '')!=-1
+			 	|| eventHost.indexOf(searchTerm || '')!=-1) {
+			 	
+            return true;
+        }
+       
+        return false;
+		};
 		friends.userPrefs = friends.preferences;
 		$scope.showPreferences= function(){
 			$scope.isShowPreference = !$scope.isShowPreference;
@@ -273,15 +308,27 @@ app.controller('MainCtrl', [
 			//$scope.eventName = "";
 			//$scope.eventHost = "";
 			//$scope.eventDescription = "";
-			$scope.category = "CATEGORY";
+			$scope.category = "Choose Category";
 		};
 		$scope.addNewEvent = function(){
 			//Find the time
-			if(!$scope.eventName || !$scope.eventHost || ($scope.category === "CATEGORY")  
-				|| !$scope.startTime || !$scope.endTime || !$scope.startTime || !$scope.eventDate)
+			if(!$scope.eventName || !$scope.eventHost || ($scope.category === "Choose Category")  
+				|| !$scope.startTime || !$scope.endTime  || !$scope.eventDate)
 				{
 					$scope.submissionError = "Missing a required field";
 					return;
+				}
+			if(!$scope.eventName.length > 150 || !$scope.eventHost.length > 150 || ($scope.category === "Choose Category")  
+				|| !$scope.startTime.length > 150 || !$scope.endTime.length > 150  || !$scope.eventDate.length > 150)
+				{
+					$scope.submissionError = "Field is too long";
+					return;
+				}
+				if($scope.eventDescription){
+					if ($scope.eventDescription.length > 550){
+						$scope.submissionError = "Field is too long";
+					return;
+					}
 				}
 				$scope.submissionError = "";
 			var timeStart = stringToUTC($scope.startTime);
@@ -318,6 +365,8 @@ app.controller('MainCtrl', [
 			LxNotificationService.info('Event Submitted for Review!');
 		};
 		$scope.showEventForm = function(){
+			console.log("YEAAAA");
+			console.log("hello" + $scope.searchTerm);
 			$scope.showEvent = !$scope.showEvent;
 		};
 		$scope.incrementUpvotes = function(post){

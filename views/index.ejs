@@ -117,7 +117,7 @@
 <br>
 
 <div class="col-md-3">
-  <lx-date-picker label="Pick a date*" model="eventDate" >Pick a date</lx-date-picker>
+  <lx-date-picker label="Pick a date*" model="eventDate" locale="us" style="padding-top:50px">Pick a date</lx-date-picker>
 </div>
   <div class="col-md-2">
     <lx-text-field label="Start Time*">
@@ -195,7 +195,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr class="data-table__clickable-row" ng-repeat="event in group.events | orderBy:'eventDate' | filter: searchTerm" ng-click="opendDialog(event)">
+      <tr class="data-table__clickable-row" ng-repeat="event in group.events | orderBy:'eventDate' | filter: search" ng-click="opendDialog(event)">
         <td>
           <span><h4 ><b>{{event.startTimeString}}</b></h4></span>
         </td>

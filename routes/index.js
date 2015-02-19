@@ -24,21 +24,21 @@ passport.deserializeUser(function(id, done){
   });
 });
 
-var googleAuth =
-{
-        'clientID'      : '375009401841-n8lbs9fqtom68hbh9oo1dprpj7l3gq0f.apps.googleusercontent.com',
-        'clientSecret'  : 'lcFBv3AtdTrc_lRyyj4EZ8-I',
-        'callbackURL'   : 'http://tigerevents.org/auth/google/callback'
-    };
+// var googleAuth =
+// {
+//         'clientID'      : '375009401841-n8lbs9fqtom68hbh9oo1dprpj7l3gq0f.apps.googleusercontent.com',
+//         'clientSecret'  : 'lcFBv3AtdTrc_lRyyj4EZ8-I',
+//         'callbackURL'   : 'http://tigerevents.org/auth/google/callback'
+//     };
 
 //local
 
-// var googleAuth =
-// {
-//         'clientID'      : '1032678438442-rhvgkn5l7en4mmnv2t94jiamnndo4reb.apps.googleusercontent.com',
-//         'clientSecret'  : 'J9QEdWZG2YMVuJkWw1BotaMu',
-//         'callbackURL'   : 'http://localhost:3000/auth/google/callback'
-//     };
+var googleAuth =
+{
+        'clientID'      : '1032678438442-rhvgkn5l7en4mmnv2t94jiamnndo4reb.apps.googleusercontent.com',
+        'clientSecret'  : 'J9QEdWZG2YMVuJkWw1BotaMu',
+        'callbackURL'   : 'http://localhost:3000/auth/google/callback'
+    };
 passport.use(new GoogleStrategy({
   clientID: googleAuth.clientID,
   clientSecret: googleAuth.clientSecret,
