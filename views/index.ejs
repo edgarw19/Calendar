@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>TigerEvents</title>
-	<link rel="stylesheet" href="bower_components/lumx/dist/css/lumx.css">
-	<link href="./stylesheets/bootstrap.css" rel="stylesheet">
-	<link href="./stylesheets/jquery-clockpicker.min.css" rel="stylesheet">
+  <title>TigerEvents</title>
+  <link rel="stylesheet" href="bower_components/lumx/dist/css/lumx.css">
+  <link href="./stylesheets/bootstrap.css" rel="stylesheet">
+  <link href="./stylesheets/jquery-clockpicker.min.css" rel="stylesheet">
   <link href="./stylesheets/ng-tags-input.css" rel="stylesheet">
   <link href="./stylesheets/ng-tags-input.bootstrap.css" rel="stylesheet">
 
@@ -13,16 +13,38 @@
 
 </head>
 <body ng-app="flapperNews" style="background-color: rgba(255, 255, 255, .8)">
-	<div class="row">
-		<div class="col-md-10 col-md-offset-1">
-			<ui-view></ui-view>
-		</div>
-	</div>
+  <div class="row">
+    <div class="col-md-10 col-md-offset-1">
+      <ui-view></ui-view>
+    </div>
+  </div>
 
-	<script type="text/ng-template" id="/home.html">
+  <script type="text/ng-template" id="/home.html">
 
+<!-- Navbar -->
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle pull-right" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand"><strong>TigerEvents</strong></a>
+        </div>
 
-<div class="col-md-4">
+        <div class="collapse navbar-collapse navbar-ex1-collapse" role="navigation">
+            <ul class="nav navbar-nav navbar-right">
+                <li id="genEventsNav"><a href="/#">Welcome, __!</a></li>
+                <li id="myEventsNav"><a href="/eventItems">EVENTS</a></li>
+                <li id="logout"><a href="/logout">LOGOUT</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-4" style="margin-top:60px">
   <h1>Tiger Events</h1>
   <h4 style="color: gray">The best events on campus, everyday</h4>
 </div>
@@ -196,7 +218,7 @@
   <table class="data-table data-table--has-primary data-table--has-secondary">
     <thead>
       <tr>
-      	<th><b>Time</b></th>
+        <th><b>Time</b></th>
         <th><b>Event Name</b></th>
         <th><b>Location</b></th>
         <th><b>Category</b></th>
@@ -212,7 +234,7 @@
           <span><h4 style="color:gray"><b>{{event.eventName}}</b></h4> </span>
         </td>
         <td>
-        	<span><h4 style="color:gray"><b>{{event.eventHost}}</b></h4></span>
+          <span><h4 style="color:gray"><b>{{event.eventHost}}</b></h4></span>
         </td>
         <td>
           <span><button class="btn btn--s btn--{{event.categoryColor}} btn--raised">{{event.category}}</button></span>
@@ -261,3 +283,7 @@
 </script>
 </body>
 </html>
+
+
+
+

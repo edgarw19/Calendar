@@ -98,7 +98,7 @@ router.get('/autocomplete', function(req, res) {
 
 });
 
-router.get('/TigerEvents', isLoggedIn, function(req, res){
+router.get('/TigerEvents', function(req, res){
   console.log("USER LOGGED IN" + req.user);
   res.render('index');
 });
@@ -128,6 +128,12 @@ router.get('/events', isLoggedIn, function(req, res, next) {
     res.json(events);
   });
 });
+
+router.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('/');
+});
+
 
 router.post('/autocomplete', function(req, res, next) {
   var newSuggestion = new AutoComplete(req.body);
