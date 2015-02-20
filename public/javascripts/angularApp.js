@@ -310,9 +310,9 @@ app.controller('MainCtrl', [
 			LxNotificationService.info('Event added to my events!');
 		}
 		$scope.clearEventForm = function(){
-			//$scope.eventName = "";
-			//$scope.eventHost = "";
-			//$scope.eventDescription = "";
+			$scope.eventName = "";
+			$scope.eventHost = "";
+			$scope.eventDescription = "";
 			$scope.category = "Choose Category";
 		};
 		$scope.fullClearEventForm = function(){
