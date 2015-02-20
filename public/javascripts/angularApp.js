@@ -15,64 +15,64 @@ app.factory('friends', ['$http', '$q', function($http, $q){
 		colors: ["green", "red", "blue", "grey", "orange", "purple"],
 		userPrefs: [],
 		preferences: [
-    		{ "text": "Art", isPref: false , checked: ""},
-    		{ "text": "Consulting", isPref: false, checked: "" },
-    		{ "text": "Dance", isPref: false, checked: "" },
-    		{ "text": "Energy", isPref: false, checked: "" },
-    		{ "text": "Entrepreneurship", isPref: false, checked: "" },
-    		{ "text": "Faith", isPref: false, checked: "" },
-    		{ "text": "Finance", isPref: false, checked: "" },
-    		{ "text": "Food", isPref: false, checked: "" },
-    		{ "text": "Internships", isPref: false, checked: "" },
-    		{ "text": "Law", isPref: false, checked: "" },
-    		{ "text": "Marketing", isPref: false, checked: "" },
-    		{ "text": "Medicine", isPref: false, checked: "" },
-    		{ "text": "Music" , isPref: false, checked: ""},
-    		{ "text": "Nonprofit" , isPref: false, checked: ""},
-    		{ "text": "Party" , isPref: false, checked: ""},
-    		{ "text": "Technology", isPref: false, checked: "" },
-    		{ "text": "Volunteer", isPref: false, checked: "" },
-  					]
-		};
-	 var tags = [
-    { "text": "Art" },
-    { "text": "Consulting" },
-    { "text": "Dance" },
-    { "text": "Energy" },
-    { "text": "Entrepreneurship" },
-    { "text": "Faith" },
-    { "text": "Finance" },
-    { "text": "Food" },
-    { "text": "Internships" },
-    { "text": "Law" },
-    { "text": "Marketing" },
-    { "text": "Medicine" },
-    { "text": "Music" },
-    { "text": "Nonprofit" },
-    { "text": "Party" },
-    { "text": "Technology" },
-    { "text": "Volunteer" },
-  ];
-  o.load = function(query){
-  	var deferred = $q.defer();
-  	var autoTags = [];
-  	console.log(query);
-  	var re = new RegExp(query, "i");
-  	for (var i = 0; i < tags.length; i++){
-  		if (re.test(tags[i].text)){
-  			autoTags.push(tags[i]);
-  		}
-  	}
-  	if (autoTags.length > 0){
-  		console.log("YES");
-  		deferred.resolve(autoTags);
-  	}
-  	else {
-  		console.log("NO");
-  	deferred.resolve(tags);
-  	}
-  	return deferred.promise;
-  } 
+		{ "text": "Art", isPref: false , checked: ""},
+		{ "text": "Consulting", isPref: false, checked: "" },
+		{ "text": "Dance", isPref: false, checked: "" },
+		{ "text": "Energy", isPref: false, checked: "" },
+		{ "text": "Entrepreneurship", isPref: false, checked: "" },
+		{ "text": "Faith", isPref: false, checked: "" },
+		{ "text": "Finance", isPref: false, checked: "" },
+		{ "text": "Food", isPref: false, checked: "" },
+		{ "text": "Internships", isPref: false, checked: "" },
+		{ "text": "Law", isPref: false, checked: "" },
+		{ "text": "Marketing", isPref: false, checked: "" },
+		{ "text": "Medicine", isPref: false, checked: "" },
+		{ "text": "Music" , isPref: false, checked: ""},
+		{ "text": "Nonprofit" , isPref: false, checked: ""},
+		{ "text": "Party" , isPref: false, checked: ""},
+		{ "text": "Technology", isPref: false, checked: "" },
+		{ "text": "Volunteer", isPref: false, checked: "" },
+		]
+	};
+	var tags = [
+	{ "text": "Art" },
+	{ "text": "Consulting" },
+	{ "text": "Dance" },
+	{ "text": "Energy" },
+	{ "text": "Entrepreneurship" },
+	{ "text": "Faith" },
+	{ "text": "Finance" },
+	{ "text": "Food" },
+	{ "text": "Internships" },
+	{ "text": "Law" },
+	{ "text": "Marketing" },
+	{ "text": "Medicine" },
+	{ "text": "Music" },
+	{ "text": "Nonprofit" },
+	{ "text": "Party" },
+	{ "text": "Technology" },
+	{ "text": "Volunteer" },
+	];
+	o.load = function(query){
+		var deferred = $q.defer();
+		var autoTags = [];
+		console.log(query);
+		var re = new RegExp(query, "i");
+		for (var i = 0; i < tags.length; i++){
+			if (re.test(tags[i].text)){
+				autoTags.push(tags[i]);
+			}
+		}
+		if (autoTags.length > 0){
+			console.log("YES");
+			deferred.resolve(autoTags);
+		}
+		else {
+			console.log("NO");
+			deferred.resolve(tags);
+		}
+		return deferred.promise;
+	} 
 	o.getAll = function(){
 		return $http.get('/events').success(function(data){
 			angular.copy(data, o.events);//makes UI update correctly
@@ -99,9 +99,9 @@ app.factory('friends', ['$http', '$q', function($http, $q){
 		});
 	}
 
-	o.test = function(suggestion){
-		return $http.post('/autocomplete', suggestion).success(function(data){
-			console.log(data);
+	o.removeEvent = function(event){
+		return $http.post('/removeEvent', event).success(function(data){
+			console.log("done");
 		});
 	};
 	o.create = function(event){
@@ -199,20 +199,20 @@ app.controller('MainCtrl', [
 				searchTerm = '';
 			}
 			
-			 if (eventName.indexOf(searchTerm || '')!=-1 || eventCategory.indexOf(searchTerm || '')!=-1
-			 	|| eventHost.indexOf(searchTerm || '')!=-1) {
-			 	
-            return true;
-        }
-       
-        return false;
-		};
-		friends.userPrefs = friends.preferences;
-		$scope.showPreferences= function(){
-			$scope.isShowPreference = !$scope.isShowPreference;
+			if (eventName.indexOf(searchTerm || '')!=-1 || eventCategory.indexOf(searchTerm || '')!=-1
+				|| eventHost.indexOf(searchTerm || '')!=-1) {
+
+				return true;
 		}
-		$scope.groupBy = function(attribute){
-			$scope.groups = [];
+
+		return false;
+	};
+	friends.userPrefs = friends.preferences;
+	$scope.showPreferences= function(){
+		$scope.isShowPreference = !$scope.isShowPreference;
+	}
+	$scope.groupBy = function(attribute){
+		$scope.groups = [];
 			//sortOn($scope.events, attribute);
 			var groupValue = "_INVALID_GROUP_VALUE_";
 			for (var i = 0; i < $scope.events.length; i++){
@@ -289,7 +289,7 @@ app.controller('MainCtrl', [
 				$scope.dialog.Tags = event.tags;
 			}
 			if (event.startTimeString && event.endTimeString){
-			$scope.dialog.Time = event.startTimeString.substring(0, 5) + "-" + event.endTimeString;
+				$scope.dialog.Time = event.startTimeString.substring(0, 5) + "-" + event.endTimeString;
 			}
 		};
 		$scope.opendDialog = function(event)
@@ -325,23 +325,23 @@ app.controller('MainCtrl', [
 			//Find the time
 			if(!$scope.eventName || !$scope.eventHost || ($scope.category === "Choose Category")  
 				|| !$scope.startTime || !$scope.endTime  || !$scope.eventDate)
-				{
-					$scope.submissionError = "Missing a required field";
-					return;
-				}
+			{
+				$scope.submissionError = "Missing a required field";
+				return;
+			}
 			if($scope.eventName.length > 150 || $scope.eventHost.length > 150 || ($scope.category === "Choose Category")  
 				|| $scope.startTime.length > 150 || $scope.endTime.length > 150  || $scope.eventDate.length > 150)
-				{
+			{
+				$scope.submissionError = "Field is too long";
+				return;
+			}
+			if($scope.eventDescription){
+				if ($scope.eventDescription.length > 550){
 					$scope.submissionError = "Field is too long";
 					return;
 				}
-				if($scope.eventDescription){
-					if ($scope.eventDescription.length > 550){
-						$scope.submissionError = "Field is too long";
-					return;
-					}
-				}
-				$scope.submissionError = "";
+			}
+			$scope.submissionError = "";
 			var timeStart = stringToUTC($scope.startTime, false);
 			//console.log($scope.startTime);
 			var timeEnd = stringToUTC($scope.endTime, true);
@@ -407,37 +407,43 @@ app.controller('MainCtrl', [
 // 		}
 // 	}]);
 
-	
+
 
 app.controller('myEventsCtrl', ['$scope', 'friends', 'LxDialogService', 'LxNotificationService', function($scope, friends, LxDialogService, LxNotificationService){
 	$scope.events = friends.events;
 	$scope.dialog = {};
 	var name = friends.userProfile[0].googleId.name.split(" ");
 	$scope.user = name[0];
+	$scope.removeEvent = function(event, index){
+		console.log(event);
+		console.log(index);
+		friends.removeEvent(event);
+		$scope.events.splice(index, 1);
+	};
 	$scope.addToCal = function(event){
-			friends.addToCal(event);
-			LxNotificationService.notify('Added to your GCal!');
-		};
+		friends.addToCal(event);
+		LxNotificationService.notify('Added to your GCal!');
+	};
 	$scope.setDialog = function(event){
 
-			$scope.dialog.Title = event.eventName;
-			$scope.dialog.Date = event.eventDisplay;
-			$scope.dialog.Description = event.eventDescription;
-			$scope.dialog.Host = event.eventHost;
-			$scope.dialog.fullEvent = event;
-			if(event.tags){
-				$scope.dialog.Tags = event.tags;
-			}
-			if (event.startTimeString && event.endTimeString){
+		$scope.dialog.Title = event.eventName;
+		$scope.dialog.Date = event.eventDisplay;
+		$scope.dialog.Description = event.eventDescription;
+		$scope.dialog.Host = event.eventHost;
+		$scope.dialog.fullEvent = event;
+		if(event.tags){
+			$scope.dialog.Tags = event.tags;
+		}
+		if (event.startTimeString && event.endTimeString){
 			$scope.dialog.Time = event.startTimeString.substring(0, 5) + "-" + event.endTimeString;
-			}
-		};
-		$scope.opendDialog = function(event)
-		{
-			$scope.setDialog(event);
+		}
+	};
+	$scope.opendDialog = function(event)
+	{
+		$scope.setDialog(event);
 
-			LxDialogService.open('test');
-		};
+		LxDialogService.open('test');
+	};
 	$scope.test = function(){
 		console.log("HERE");
 		friends.test();

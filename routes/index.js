@@ -3,7 +3,7 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var Events = require('../models/Events.js');
-var Tests = require('../models/Tests.js');
+var UpdatedEvents = require('../models/UpdatedEvents.js');
 var AutoComplete = require('../models/autoComplete.js');
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
@@ -25,21 +25,21 @@ passport.deserializeUser(function(id, done){
   });
 });
 
-var googleAuth =
-{
-        'clientID'      : '375009401841-n8lbs9fqtom68hbh9oo1dprpj7l3gq0f.apps.googleusercontent.com',
-        'clientSecret'  : 'lcFBv3AtdTrc_lRyyj4EZ8-I',
-        'callbackURL'   : 'http://tigerevents.org/auth/google/callback'
-    };
+// var googleAuth =
+// {
+//         'clientID'      : '375009401841-n8lbs9fqtom68hbh9oo1dprpj7l3gq0f.apps.googleusercontent.com',
+//         'clientSecret'  : 'lcFBv3AtdTrc_lRyyj4EZ8-I',
+//         'callbackURL'   : 'http://tigerevents.org/auth/google/callback'
+//     };
 
 //local
 
-// var googleAuth =
-// {
-//         'clientID'      : '1032678438442-rhvgkn5l7en4mmnv2t94jiamnndo4reb.apps.googleusercontent.com',
-//         'clientSecret'  : 'J9QEdWZG2YMVuJkWw1BotaMu',
-//         'callbackURL'   : 'http://localhost:3000/auth/google/callback'
-//     };
+var googleAuth =
+{
+        'clientID'      : '1032678438442-rhvgkn5l7en4mmnv2t94jiamnndo4reb.apps.googleusercontent.com',
+        'clientSecret'  : 'J9QEdWZG2YMVuJkWw1BotaMu',
+        'callbackURL'   : 'http://localhost:3000/auth/google/callback'
+    };
 passport.use(new GoogleStrategy({
   clientID: googleAuth.clientID,
   clientSecret: googleAuth.clientSecret,
@@ -252,34 +252,61 @@ router.post('/autocomplete', function(req, res, next) {
   })
 });*/
 
+
+router.post('/removeEvent', isLoggedIn, function(req, res, next){
+  console.log(req.body);
+  var query = Events.findOne({"_id": req.body._id});
+  query.exec(function(err, foundEvent){
+    for (var i = 0; i < foundEvent.favoritedBy.length; i++){
+      if (foundEvent.favoritedBy[i].equals(req.user._id)){
+        foundEvent.favoritedBy.splice(i, 1);
+        break;
+      }
+    }
+    foundEvent.save(function(err, savedEvent){
+      if (err) {console.log("DIDNT REMOVE EVENT FAVORITED BY USER"); return next(err);}
+      res.json(200);
+    });
+
+  });
+});
+
 router.post('/events', isLoggedIn, function(req, res, next) {
   console.log("Adding a new event");
+  console.log(req.user.googleId.email);
+  req.body.creator = req.user.googleId.email;
   User.findById(req.user._id, function(err, appUser){
     if (appUser.numOfPosts > 50){
       res.json(204);
     }  
     if (appUser.postPermission){
-      var newEvent = new Events(req.body);
+      var newEvent = new Events(req.body);      
       newEvent.save(function(err, savedEvent){
         if (err){return next(err)};
         console.log("new event added" + savedEvent);
-        appUser.numOfPosts = appUser.numOfPosts + 1;
-        appUser.save(function(err, savedUser){
-          if (err) {console.log("NO SAVE, YES PERMISS");return next(err);}
-          res.json(savedEvent);
+        savedEvent.save(function(err, savedEvent){
+          if (err){console.log("NO SAVE EVENT"); return next(err);}
+          appUser.numOfPosts = appUser.numOfPosts + 1;
+          appUser.save(function(err, savedUser){
+            if (err) {console.log("NO SAVE, YES PERMISS");return next(err);}
+            res.json(savedEvent);
+          });
         });
       });
     }
     else {
-      var newEvent = new Tests(req.body);
+      var newEvent = new UpdatedEvents(req.body);
       newEvent.save(function(err, savedEvent){
         if (err){return next(err)};
         console.log("new event added" + savedEvent);
-        appUser.numOfPosts = appUser.numOfPosts + 1;
-        appUser.save(function(err, savedUser){
-          if (err) {console.log("NO SAVE, NO PERMISS");return next(err);}
-          res.json(savedEvent);
-        });
+        savedEvent.save(function(err, savedEvent){
+          if (err){console.log("NO SAVE EVENT"); return next(err);}
+          appUser.numOfPosts = appUser.numOfPosts + 1;
+          appUser.save(function(err, savedUser){
+            if (err) {console.log("NO SAVE, YES PERMISS");return next(err);}
+            res.json(savedEvent);
+          });
+        })
       });;
     }
 
@@ -287,40 +314,96 @@ router.post('/events', isLoggedIn, function(req, res, next) {
   });
 });
 
-router.post('/addToCal', isLoggedIn, function(req, res, next) {
-    console.log("Adding event to calendar");
-    var newEvent = new Events(req.body);
-    var eventBody = {
-    'status':'confirmed',
-    'summary': newEvent.eventName,
-    'location': newEvent.eventHost,
-    'description': newEvent.eventDescription,
-    'start': {
-      'dateTime': moment(new Date(newEvent.eventStartUTC)).format("YYYY-MM-DDTHH:mm:ssZ"),
-      'timeZone': "America/New_York"
-    },
-    'end': {
-      'dateTime': moment(new Date(newEvent.eventEndUTC)).format("YYYY-MM-DDTHH:mm:ssZ"),
-      'timeZone': "America/New_York"
-    },
-    'attendees': [
-        {
-          'email': req.user.googleId.email,
-          'responseStatus': 'needsAction'
-        }
-    ]
-  };
-  var google_calendar = new googleCal.GoogleCalendar(req.user.googleId.token);
-  google_calendar.events.insert(req.user.googleId.email, eventBody, function(err, response){
-    console.log("Google response:", err, response);
+// eventsAdded: [],
+//   eventPreferences: [],
+//   googleCal: [],
 
-    if (!err){
-      res.send(200, response);
-    }
-    else {
-      res.send(400, err);
+//   var query = Events.findOne({_id: req.body._id});
+//   console.log("here");
+//   query.exec(function(err, eventf){
+//     var tags = eventf.favoritedBy;
+//     var isMarked = false;
+//     for (var i = 0; i < tags.length; i++){
+//       if (tags[i].equals(req.user._id)){
+//         isMarked = true;
+//         break;
+//       }
+//     }
+//     if (isMarked){
+//       res.json(eventf);
+//     }
+//     else {
+//       eventf.favoritedBy.push(req.user._id);
+//       eventf.popularity = eventf.popularity+1;
+//       eventf.save(function(err, savedEvent){
+//       if (err){console.log(err); return next(err)};
+//       console.log(savedEvent);
+//       res.json(savedEvent);
+//     });
+//     }
+
+
+router.post('/addToCal', isLoggedIn, function(req, res, next) {
+  var query = User.findOne({"_id": req.user._id});
+  var isMarked = false;
+  query.exec(function(err, foundUser){
+    var newEvent = new Events(req.body);
+    if (foundUser.googleCal){
+      console.log("CHECKING GCAL");
+      for (var i = 0; i < foundUser.googleCal.length; i++){
+        console.log("FOUNDUSER ID IS" + foundUser.googleCal[i]);
+        console.log("EVENT ID IS"+ newEvent._id);
+        if (foundUser.googleCal[i].equals(newEvent._id)){
+          isMarked = true;
+          break;
+        }
+      }
+      if (isMarked){
+        res.json(204);
+      }
+      else {
+        console.log("got to eventBody");
+        var eventBody = {
+          'status':'confirmed',
+          'summary': newEvent.eventName,
+          'location': newEvent.eventHost,
+          'description': newEvent.eventDescription,
+          'start': {
+            'dateTime': moment(new Date(newEvent.eventStartUTC)).format("YYYY-MM-DDTHH:mm:ssZ"),
+            'timeZone': "America/New_York"
+          },
+          'end': {
+            'dateTime': moment(new Date(newEvent.eventEndUTC)).format("YYYY-MM-DDTHH:mm:ssZ"),
+            'timeZone': "America/New_York"
+          },
+          'attendees': [
+          {
+            'email': req.user.googleId.email,
+            'responseStatus': 'needsAction'
+          }
+          ]
+        };
+        var google_calendar = new googleCal.GoogleCalendar(req.user.googleId.token);
+        google_calendar.events.insert(req.user.googleId.email, eventBody, function(err, response){
+
+          if (!err){
+            console.log("ADDED TO GCAL");
+            foundUser.googleCal.push(newEvent._id);
+            foundUser.save(function(err, savedUser){         
+              res.send(200, response);
+            });
+
+          }
+          else {
+            console.log("DIDNT ADD TO GCAL");
+            res.send(400, err);
+          }
+        });
+      }
     }
   });
+
+
 });
 /* Google Login routes. */
 router.get('/auth/google', passport.authenticate('google', {

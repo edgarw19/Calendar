@@ -40,6 +40,7 @@
             <ul class="nav navbar-nav navbar-right">
                 <li id="genEventsNav"><a>Welcome, {{user}}!</a></li>
                 <li id="myEventsNav"><a href="#/myevents">My Events</a></li>
+                <li id="feedback"><a href="https://docs.google.com/forms/d/1_QEtAeUA7x_IfoBThOrVXmIkQxzyznHpIHdv8ESxWw0/viewform?usp=send_form">Contact Us</a></li>
                 <li id="logout"><a href="/logout">Logout</a></li>
             </ul>
         </div>
@@ -355,7 +356,9 @@
             </div>
 
             <div class="card__actions">
+                <button class="btn btn--m btn--orange btn--flat" lx-ripple ng-click="removeEvent(event, $index)">Remove</button>
                 <button class="btn btn--m btn--black btn--flat" lx-ripple ng-click="opendDialog(event)">More</button>
+                
             </div>
         </div>
         </div>

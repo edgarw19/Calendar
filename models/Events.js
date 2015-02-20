@@ -16,10 +16,11 @@ var EventSchema = new mongoose.Schema({
 	eventStartUTC: Number,
 	eventEndUTC: Number,
 	popularity: {type: Number, default: 0},
-	favoritedBy: []
-
+	favoritedBy: [],
+	creator: []
 
 });
+
 
 
 
