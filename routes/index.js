@@ -73,19 +73,25 @@ passport.use(new GoogleStrategy({
       }
       else 
       {
-        var newUser = new User();
-        newUser.googleId.id = profile.id;
-        newUser.googleId.token = token;
-        newUser.googleId.name  = profile.displayName;
-        newUser.lastTime = new Date();
-        newUser.visits = 1;
-        newUser.googleId.refreshToken = refreshToken;
-        newUser.googleId.email = profile.emails[0].value;
-      //newUser.googleCal.push(google_calendar);
-      newUser.save(function(err){
-        if (err) throw err;
-        return done(null, newUser);
-      });
+        var auto = new AutoComplete({category: profile.emails[0].value});
+        auto.save(function(err, saved){
+          if (err) return next(err);
+          return done(null, false, {message: "Invalid _@princeton.edu address"});
+        });
+        
+      //   var newUser = new User();
+      //   newUser.googleId.id = profile.id;
+      //   newUser.googleId.token = token;
+      //   newUser.googleId.name  = profile.displayName;
+      //   newUser.lastTime = new Date();
+      //   newUser.visits = 1;
+      //   newUser.googleId.refreshToken = refreshToken;
+      //   newUser.googleId.email = profile.emails[0].value;
+      // //newUser.googleCal.push(google_calendar);
+      // newUser.save(function(err){
+      //   if (err) throw err;
+      //   return done(null, newUser);
+      // });
     }
   }
 });
