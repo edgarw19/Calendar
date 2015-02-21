@@ -176,7 +176,7 @@ router.get('/events', isLoggedIn, function(req, res, next) {
   var upperCutoff = cutOff + 864000000;
   var preferences = [];
   console.log(cutOff);
-  var query = Events.find({eventUTC: {$gt: cutOff, $lt: upperCutoff}});
+  var query = Events.find({eventStartUTC: {$gt: cutOff, $lt: upperCutoff}});
   /*if (req.user.eventPreferences.length > 0){
     var userPrefs = req.user.eventPreferences;
     console.log("grabbinb preferences!");
